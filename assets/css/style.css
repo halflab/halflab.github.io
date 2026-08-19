@@ -1762,6 +1762,27 @@ a.tag:hover { filter: brightness(.93); }
   background-image: var(--scan-hi);
 }
 
+/* Low-field mode drops the gradient letterforms in the hero title back to
+   flat colour.
+
+   `background-clip: text` with a transparent colour is the one thing on the
+   home page that no other page has, and combining it with an SVG filter is a
+   known way to get a blank layer out of WebKit — on iOS it took every
+   filtered element on the page down with it, header logo included. The
+   fallback colours were already declared for browsers without background-clip
+   support; this just brings them forward.
+
+   No real loss either: at 4px blocks, a gradient across four letters is
+   mush. */
+:root[data-field="low"] .hero h1 .accent-red,
+:root[data-field="low"] .hero h1 .accent-blue {
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  background-image: none;
+}
+:root[data-field="low"] .hero h1 .accent-red  { color: var(--red); }
+:root[data-field="low"] .hero h1 .accent-blue { color: var(--blue); }
+
 @media (prefers-reduced-motion: reduce) {
   .field-grain { transition: none; }
 }
