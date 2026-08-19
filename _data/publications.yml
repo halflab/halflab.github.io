@@ -65,6 +65,21 @@
 
 publications:
 
+  - title: "Brain-age in ultra-low-field MRI: how well does it work?"
+    authors: 'Biondo F, Bennallick C, Martin SA, Puglisi L, Booth TC, Wood DA, Iglesias JE, **Váša F**\*, Cole JH\*'
+    authors_full: "Biondo F, Bennallick C, Martin SA, Puglisi L, Booth TC, Wood DA, Iglesias JE, **Váša F**, Cole JH"
+    year: 2026
+    tags: [lf, hf, nn]
+    venue: Imaging Neuroscience
+    details: "2025–10"
+    url: https://direct.mit.edu/imag/article/doi/10.1162/IMAG.a.1352/138105/Brain-age-in-ultra-low-field-MRI-how-well-does-it
+    preprint: 
+    pdf: 
+    code: 
+    data: 
+    note: 
+    selected:
+
   - title: "Gray Matter Volume Loss in Parkinson's Disease Psychosis and Cannabinoid Receptor Gene Expression in the Brain"
     authors: "Pisani S, **Váša F**, Velayudhan L, Bhattacharyya S"
     authors_full: "Pisani S, **Váša F**, Velayudhan L, Bhattacharyya S"
@@ -102,7 +117,7 @@ publications:
     tags: [hf, bn]
     venue: "Brain Communications"
     details: "fcaf074"
-    url: "https://doi.org/10.1101/2024.01.22.576651"
+    url: https://academic.oup.com/braincomms/article/7/2/fcaf074/8016394
     preprint: 
     pdf: 
     code: 
@@ -117,7 +132,7 @@ publications:
     tags: [hf, bn]
     venue: "Communications Biology"
     details: "8(1), 889"
-    url: "https://doi.org/10.1101/2024.06.17.599309"
+    url: https://www.nature.com/articles/s42003-025-08295-2
     preprint: 
     pdf: 
     code: 
@@ -230,21 +245,6 @@ publications:
     note: 
     selected:
 
-  - title: "Brain-age in ultra-low-field MRI: how well does it work?"
-    authors: 'Biondo F, Bennallick C, Martin SA, Puglisi L, Booth TC, Wood DA, Iglesias JE, **Váša F**\*, Cole JH\*'
-    authors_full: "Biondo F, Bennallick C, Martin SA, Puglisi L, Booth TC, Wood DA, Iglesias JE, **Váša F**, Cole JH"
-    year: 2025
-    tags: [lf, hf, nn]
-    venue: "medRxiv"
-    details: "2025–10"
-    url: "https://doi.org/10.1101/2025.10.19.25338298"
-    preprint: 
-    pdf: 
-    code: 
-    data: 
-    note: 
-    selected:
-
   - title: "GAMBAS: Generalised-hilbert mamba for super-resolution of paediatric ultra-low-field MRI"
     authors: '**Baljer L**, **Briski U**, Leech R, Bourke NJ, Donald KA, Bradford LE, Williams SR, Parkar S, Kaleem S, Osmani S, Deoni SCL, Williams SCR, Moran RJ\*, Robinson EC\*, **Váša F**\*'
     authors_full: "**Baljer L**, **Briski U**, Leech R, Bourke NJ, Donald KA, Bradford LE, Williams SR, Parkar S, Kaleem S, Osmani S, Deoni SCL, Williams SCR, Moran RJ, Robinson EC, **Váša F**"
@@ -276,7 +276,7 @@ publications:
     selected:
 
   - title: "UNITY: A low-field magnetic resonance neuroimaging initiative to characterize neurodevelopment in low and middle-income settings"
-    authors: "Abate F, Adu-Amankwah A, Ae-Ngibise K, [...], **Váša F**, [...], Deoni SCL, [Williams SCR](https://www.sciencedirect.com/author/35419560700/steven-c-r-williams)"
+    authors: "Abate F, Adu-Amankwah A, Ae-Ngibise K, [...], **Váša F**, [...], Deoni SCL, Williams SCR"
     authors_full: "Abate F, Adu-Amankwah A, Ae-Ngibise K, Agbokey F, Agyemang V, Agyemang C, Akgun C, Ametepe J, Arichi T, Asante K, et al."
     year: 2024
     tags: [lf]
@@ -312,7 +312,7 @@ publications:
     tags: [hf, bn]
     venue: "Proceedings of the National Academy of Sciences"
     details: "121(33), e2314074121"
-    url: "https://doi.org/10.1101/2023.09.17.558126"
+    url: https://www.pnas.org/doi/10.1073/pnas.2314074121
     preprint: 
     pdf: 
     code: 
@@ -342,7 +342,7 @@ publications:
     tags: [hf, bn]
     venue: "Nature Communications"
     details: "14(1), 5656"
-    url: "https://doi.org/10.1101/2023.01.13.523934"
+    url: https://www.nature.com/articles/s41467-023-41334-2
     preprint: 
     pdf: 
     code: 
@@ -357,7 +357,7 @@ publications:
     tags: [hf, bn]
     venue: "Development and Psychopathology"
     details: "35(5), 2253–2263"
-    url: "https://doi.org/10.1101/2023.05.05.538901"
+    url: https://www.cambridge.org/core/journals/development-and-psychopathology/article/resilient-functioning-is-associated-with-altered-structural-brain-network-topology-in-adolescents-exposed-to-childhood-adversity/EFD816E002464E97477DC1B40926C005
     preprint: 
     pdf: 
     code: 
@@ -402,7 +402,7 @@ publications:
     tags: [hf]
     venue: "Scientific Reports"
     details: "12(1), 1–11"
-    url: "https://doi.org/10.1101/2022.01.19.476615"
+    url: https://www.nature.com/articles/s41598-022-14904-5
     preprint: 
     pdf: 
     code: 
@@ -522,7 +522,7 @@ publications:
     tags: [hf]
     venue: "Cerebral Cortex"
     details: "29(3), 1369–1381"
-    url: "https://doi.org/10.1101/314195"
+    url: https://academic.oup.com/cercor/article/29/3/1369/5263970
     preprint: 
     pdf: 
     code: 
@@ -537,7 +537,7 @@ publications:
     tags: [hf, bn]
     venue: "Scientific Reports"
     details: "9(1), 11536"
-    url: "https://doi.org/10.1101/487421"
+    url: https://www.nature.com/articles/s41598-019-47277-3
     preprint: 
     pdf: 
     code: 
@@ -567,7 +567,7 @@ publications:
     tags: [hf, bn]
     venue: "Neuroimage"
     details: "171, 256–267"
-    url: "https://doi.org/10.1101/163758"
+    url: https://www.sciencedirect.com/science/article/pii/S1053811917310844
     preprint: 
     pdf: 
     code: 
@@ -582,7 +582,7 @@ publications:
     tags: [hf, bn]
     venue: "Cerebral Cortex"
     details: "28(1), 281–294"
-    url: "https://doi.org/10.1101/126920"
+    url: https://academic.oup.com/cercor/article/28/1/281/4566607
     preprint: 
     pdf: 
     code: 
@@ -597,7 +597,7 @@ publications:
     tags: [hf, bn]
     venue: "Neuroimage"
     details: "172, 326–340"
-    url: "https://doi.org/10.1101/233510"
+    url: https://www.sciencedirect.com/science/article/pii/S1053811917310649
     preprint: 
     pdf: 
     code: 
@@ -642,7 +642,7 @@ publications:
     tags: [hf, bn]
     venue: "Proceedings of the National Academy of Sciences"
     details: "113(32), 9105–9110"
-    url: "https://doi.org/10.1016/j.biopsych.2017.02.390"
+    url: https://www.pnas.org/doi/10.1073/pnas.1601745113
     preprint: 
     pdf: 
     code: 

@@ -1638,8 +1638,17 @@ a.tag:hover { filter: brightness(.93); }
   display: flex; align-items: flex-end; gap: .18rem; height: 17px;
 }
 /* Both glyphs are the full height of the logo — the l in "half" has an
-   ascender to match the h — so neither is scaled down against the other. */
-.tf-glyph { display: block; width: auto; height: 100%; transition: opacity .18s; }
+   ascender to match the h — so neither is scaled down against the other.
+
+   Deliberately no `display`: `.logo-dark { display: none }` is a single class
+   too, and sits earlier in the file, so a `display: block` here would win on
+   source order and un-hide the wrong half of every pair. That is what put two
+   h's and two l's in the header for anyone who had never touched the theme
+   switch — the moment <html> gained a data-theme attribute the more specific
+   rules took over and it looked correct again, which made it look like a
+   loading glitch. The label is a flex container, so its children are
+   blockified anyway. */
+.tf-glyph { width: auto; height: 100%; transition: opacity .18s; }
 .tf-glyph.tf-l { opacity: .3; }
 :root[data-field="low"] .tf-glyph.tf-h { opacity: .3; }
 :root[data-field="low"] .tf-glyph.tf-l { opacity: 1; }
