@@ -1,0 +1,1802 @@
+/* ============================================================
+   half lab — stylesheet
+   Palette and typography derived from the lab logo.
+   Colours, spacing and fonts are all set as variables in
+   :root below — change them there and the whole site follows.
+   ============================================================ */
+
+:root {
+  /* --- Logo colours --------------------------------------- */
+  --charcoal:      #4d4d4d;   /* logo body colour            */
+  --charcoal-dark: #333333;
+  --red:           #cf4832;   /* logo "high field" red       */
+  --red-dark:      #a9351f;
+  --blue:          #1e73a6;   /* logo "low field" blue       */
+  --blue-dark:     #14547c;
+
+  /* --- Neutrals ------------------------------------------- */
+  --ink:      #2e2e2e;
+  --body:     #4a4a4a;
+  --muted:    #77797c;
+  --line:     #e2e3e5;
+  --line-soft:#eeeff1;
+  --bg:       #ffffff;
+  --bg-tint:  #f7f8f9;
+  --bg-warm:  #fbf7f5;
+
+  /* --- Typography ----------------------------------------- */
+  --font-display: "Quicksand", "Trebuchet MS", sans-serif;
+  --font-body: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* --- Layout --------------------------------------------- */
+  --wrap: 1240px;   /* content column; the margins either side are what's left */
+  --wrap-narrow: 760px;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  --shadow-lift: 0 2px 4px rgba(0,0,0,.05), 0 14px 36px rgba(0,0,0,.10);
+  --gradient: linear-gradient(90deg, var(--red) 0%, var(--charcoal) 50%, var(--blue) 100%);
+}
+
+/* ============================================================
+   Dark mode. Only the variables change — every rule below reads
+   from them, so nothing else needed rewriting.
+
+   The one thing that does not survive a simple inversion is the
+   logo artwork: it is charcoal, red and blue on transparency, so
+   the charcoal strokes vanish against a dark background. Rather
+   than invert it and lose the red and blue, the marks keep a light
+   plate behind them, the way a printed logo sits on paper.
+   ============================================================ */
+/* ============================================================
+   Dark mode. Only the variables change — every rule below reads
+   from them, so nothing else needed rewriting.
+
+   The declarations appear twice: once behind the media query, so
+   the site follows the operating system on its own, and once
+   behind [data-theme="dark"], which is the header switch and can
+   override the system in either direction.
+
+   The one thing that does not survive inversion is the logo
+   artwork — charcoal, red and blue on transparency — so those
+   marks keep a light plate, the way a printed logo sits on paper.
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink:      #ecedee;
+    --body:     #c3c5c8;
+    --muted:    #90939a;
+    --line:     #33353a;
+    --line-soft:#26282c;
+    --bg:       #17181b;
+    --bg-tint:  #1d1f23;
+    --bg-warm:  #221d1d;
+    --charcoal: #b9bcc1;    /* borders and rules, not the logo itself */
+    --charcoal-dark: #d3d6da;
+    /* Both accents are lifted: the print values are too dark to read
+       against #17181b. */
+    --red:      #e8674f;
+    --red-dark: #f08a75;
+    --blue:     #55a8d8;
+    --blue-dark:#79c0e8;
+    --rail-bg: rgba(23,24,27,.97);
+    --callout-line: #3a2f2d;
+    --shadow:      0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.4);
+    --shadow-lift: 0 2px 4px rgba(0,0,0,.5), 0 14px 36px rgba(0,0,0,.55);
+  }
+  :root:not([data-theme="light"]) .site-header { background: rgba(23,24,27,.94); }
+  :root:not([data-theme="light"]) .card,
+  :root:not([data-theme="light"]) .highlight,
+  :root:not([data-theme="light"]) .venn-logo { background: var(--bg-tint); }
+  :root:not([data-theme="light"]) .scan-stage { background: #000; }
+  :root:not([data-theme="light"]) .funder-row {
+    background: #f4f5f6; border-radius: var(--radius); padding: 1rem;
+  }
+  :root:not([data-theme="light"]) .highlight img { background: transparent; padding: 2px; filter: brightness(.92); }
+  :root:not([data-theme="light"]) .venn-label { fill: #d7d9dc; }
+  :root:not([data-theme="light"]) .venn-fill.is-on { opacity: .42; }        /* the wash needs more on dark */
+  .pub-year-jump { color: var(--body); }
+  :root:not([data-theme="light"]) .overview [data-set].is-lit { color: var(--ink); }
+}
+
+:root[data-theme="dark"] {
+  --ink:      #ecedee;
+  --body:     #c3c5c8;
+  --muted:    #90939a;
+  --line:     #33353a;
+  --line-soft:#26282c;
+  --bg:       #17181b;
+  --bg-tint:  #1d1f23;
+  --bg-warm:  #221d1d;
+  --charcoal: #b9bcc1;    /* borders and rules, not the logo itself */
+  --charcoal-dark: #d3d6da;
+  /* Both accents are lifted: the print values are too dark to read
+     against #17181b. */
+  --red:      #e8674f;
+  --red-dark: #f08a75;
+  --blue:     #55a8d8;
+  --blue-dark:#79c0e8;
+  --rail-bg: rgba(23,24,27,.97);
+    --callout-line: #3a2f2d;
+    --shadow:      0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.4);
+  --shadow-lift: 0 2px 4px rgba(0,0,0,.5), 0 14px 36px rgba(0,0,0,.55);
+}
+:root[data-theme="dark"] .site-header { background: rgba(23,24,27,.94); }
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .highlight,
+:root[data-theme="dark"] .venn-logo { background: var(--bg-tint); }
+:root[data-theme="dark"] .scan-stage { background: #000; }
+:root[data-theme="dark"] .funder-row {
+    background: #f4f5f6; border-radius: var(--radius); padding: 1rem;
+  }
+  :root[data-theme="dark"] .highlight img { background: transparent; padding: 2px; filter: brightness(.92); }
+:root[data-theme="dark"] .venn-label { fill: #d7d9dc; }
+:root[data-theme="dark"] .venn-fill.is-on { opacity: .42; }        /* the wash needs more on dark */
+.pub-year-jump { color: var(--body); }
+:root[data-theme="dark"] .overview [data-set].is-lit { color: var(--ink); }
+
+/* One of each logo pair is always hidden; which one depends on the theme.
+   Two images rather than one because a media query cannot follow the header
+   switch, and swapping src in script would flash. */
+.logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light { display: none; }
+  :root:not([data-theme="light"]) .logo-dark { display: block; }
+}
+:root[data-theme="dark"] .logo-light { display: none; }
+:root[data-theme="dark"] .logo-dark { display: block; }
+:root[data-theme="light"] .logo-light { display: block; }
+:root[data-theme="light"] .logo-dark { display: none; }
+/* The glyphs sit in a flex row, so their visible half must not be forced
+   back to `block` by the pair rules above at a different size. */
+.tf-glyph.logo-light, .tf-glyph.logo-dark { width: auto; }
+
+/* ---------- Reset & base ---------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Deliberately NOT scroll-behavior: smooth. Setting it globally animates
+   every programmatic scroll in the site, including the jump to the top when
+   a new page is opened — and scrollTo's behavior:'auto' defers to this
+   property rather than overriding it, so there is no way to opt out per
+   call. The year rail asks for smooth explicitly where it wants it. */
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  /* Column layout so a short page (News, a single post) still puts the
+     footer at the bottom of the window rather than halfway up it. */
+  min-height: 100vh; display: flex; flex-direction: column;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--body);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+#main { flex: 1 0 auto; }
+.site-footer { flex-shrink: 0; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.22;
+  margin: 0 0 .5em;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: clamp(2rem, 4.4vw, 2.9rem); font-weight: 700; }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.85rem); margin-top: 2.2em; }
+h3 { font-size: 1.15rem; margin-top: 1.8em; }
+
+p { margin: 0 0 1.1em; }
+
+a { color: var(--blue-dark); text-decoration: none; border-bottom: 1px solid rgba(30,115,166,.3); transition: color .15s, border-color .15s; }
+a:hover { color: var(--red-dark); border-bottom-color: rgba(207,72,50,.55); }
+
+ul, ol { padding-left: 1.25em; }
+li { margin-bottom: .4em; }
+
+hr { border: 0; height: 1px; background: var(--line); margin: 3rem 0; }
+
+.muted { color: var(--muted); }
+
+code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .88em; background: var(--bg-tint); padding: .15em .4em; border-radius: 4px; }
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+.narrow { max-width: var(--wrap-narrow); }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--ink); color: #fff; padding: .6em 1em; border: 0;
+}
+.skip-link:focus { left: 0; }
+
+/* ---------- Header ---------------------------------------- */
+.gradient-bar { height: 7px; background: var(--gradient); }
+
+.site-header {
+  background: rgba(255,255,255,.94);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line-soft);
+  position: sticky; top: 0; z-index: 50;
+}
+
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1.5rem; min-height: 76px;
+}
+
+.brand { border: 0; display: block; flex-shrink: 0; }
+/* One-line logo is ~3.7:1, so it needs less height than the old wordmark
+   to occupy a comparable amount of the bar. */
+.brand img { height: 40px; width: auto; }
+
+.site-nav { display: flex; gap: .3rem; align-items: center; }
+
+.site-nav a {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .96rem;
+  color: var(--charcoal);
+  border: 0;
+  padding: .5rem .78rem;
+  border-radius: 6px;
+  position: relative;
+  white-space: nowrap;
+}
+.site-nav a:hover { color: var(--ink); background: var(--bg-tint); }
+.site-nav a.active { color: var(--ink); }
+.site-nav a.active::after {
+  content: ""; position: absolute; left: .78rem; right: .78rem; bottom: .18rem;
+  height: 2px; background: var(--gradient); border-radius: 2px;
+}
+
+.nav-toggle {
+  display: none; background: none; border: 0; cursor: pointer;
+  padding: .5rem; width: 42px; height: 42px;
+}
+.nav-toggle span {
+  display: block; height: 2px; width: 22px; background: var(--charcoal);
+  border-radius: 2px; margin: 4px auto; transition: .2s;
+}
+
+/* ---------- Home: hero ------------------------------------ */
+/* The hero fills exactly the band between the bottom of the header and the
+   bottom of the window — 84px is the 7px gradient bar, the 76px header and
+   its 1px border — so the grid's centring lands on the true middle of what
+   the visitor can see. The 10px margin below is what keeps the rule above
+   "Our work" off the screen; doing that with extra height instead would push
+   the content off-centre by half of it.
+
+   The padding is symmetric for the same reason: with box-sizing: border-box
+   it sits inside the min-height, so an uneven top and bottom shifts the
+   centred content by half the difference. */
+.hero {
+  min-height: calc(100vh - 84px);
+  margin-bottom: 10px;
+  display: grid; align-items: center;
+  padding: clamp(2.5rem, 6vw, 4.5rem) 0;
+  background:
+    radial-gradient(900px 380px at 12% 0%, rgba(207,72,50,.055), transparent 62%),
+    radial-gradient(900px 380px at 88% 12%, rgba(30,115,166,.07), transparent 62%);
+}
+
+@supports (height: 100svh) {
+  .hero { min-height: calc(100svh - 84px); }
+}
+
+.hero-grid {
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,.82fr);
+  gap: clamp(2.25rem, 7vw, 6.75rem); align-items: center;
+}
+
+/* Two placements for the full logo on the home page — see `hero_logo`
+   in _config.yml. */
+.hero-logo-band { width: 158px; height: auto; margin: 0 auto clamp(1.8rem, 4vw, 2.6rem); }
+.hero-logo-col  { width: 128px; height: auto; margin: 0 auto 1.3rem; }
+
+.closing-logo { width: 190px; height: auto; margin: 0 auto 1.5rem; }
+
+/* The whole hero column is centred on the midpoint of the field-strength
+   bar, which spans the full column width. */
+.hero-text { text-align: center; }
+.hero h1 {
+  font-size: clamp(1.9rem, 3.9vw, 2.85rem);
+  margin-bottom: .55em;
+}
+/* Second line of the title, same size as the first with a little extra
+   breathing room between them. */
+.hero h1 .h1-sub { display: block; margin-top: .22em; }
+/* "High" and "Low" carry the same diagonal fades as the logo letterforms:
+   the h descends from red into charcoal, the l from charcoal into blue.
+   The plain `color` is the fallback wherever background-clip:text is
+   unsupported — it must stay ahead of the clip rules. */
+.hero h1 .accent-red,
+.hero h1 .accent-blue {
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-repeat: no-repeat;
+}
+/* High runs red at the top down to charcoal at the bottom; Low runs blue at
+   the bottom up to charcoal at the top. */
+.hero h1 .accent-red {
+  color: var(--red);
+  background-image: linear-gradient(180deg, var(--red) 8%, #7a4a41 60%, var(--charcoal) 100%);
+}
+.hero h1 .accent-blue {
+  color: var(--blue);
+  background-image: linear-gradient(0deg, var(--blue) 8%, #35617e 60%, var(--charcoal) 100%);
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero h1 .accent-red,
+  .hero h1 .accent-blue { color: transparent; }
+}
+
+.hero-lead {
+  font-size: clamp(1.02rem, 1.5vw, 1.17rem);
+  color: var(--body);
+  max-width: 40em; margin-inline: auto;
+}
+
+.hero-meta {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .82rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.4rem;
+}
+
+/* Width is set in script to match the second line of the title, so the end
+   labels sit exactly under its ends. */
+.hero-fields {
+  display: flex; align-items: center; gap: .8rem;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: .95rem; margin: -.15em auto 1.25em;
+  max-width: 100%;
+}
+.hero-fields .hf-low  { color: var(--blue); flex: 0 0 auto; }
+.hero-fields .hf-high { color: var(--red);  flex: 0 0 auto; }
+/* The bar takes whatever space is left, so it always spans the full
+   distance between the two labels however wide the column is. */
+.hero-fields .hf-arrow {
+  flex: 1 1 auto; min-width: 40px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--red));
+}
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.9rem;
+  justify-content: center; }
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 600; font-size: .95rem;
+  padding: .68em 1.35em;
+  border-radius: 999px;
+  border: 1.5px solid var(--charcoal);
+  color: var(--charcoal); background: transparent;
+  transition: all .18s;
+}
+.btn:hover { background: var(--charcoal); color: #fff; border-color: var(--charcoal); }
+.btn-primary { background: var(--charcoal); color: #fff; }
+.btn-primary:hover { background: var(--blue-dark); border-color: var(--blue-dark); }
+
+/* ---------- Sections -------------------------------------- */
+/* Kept tighter than the usual editorial rhythm: the hero already takes a
+   full screen, so every rem here is scrolling before anything is read. */
+.section { padding: clamp(2.2rem, 4vw, 3.2rem) 0; }
+.section-tint { background: var(--bg-tint); border-block: 1px solid var(--line-soft); }
+
+.section-head { margin-bottom: 1.7rem; max-width: 46em; }
+/* `wide` lets the intro paragraph run the full width of the cards below. */
+.section-head.wide { max-width: none; }
+/* fit-content keeps the gradient rule the same width as the heading text. */
+.section-head h2 { margin-top: 0; width: fit-content; }
+/* A thin underline the width of the heading text, in one flat colour.
+   Sections alternate red / blue / charcoal so each page shows a mix. */
+.section-head h2::after {
+  content: ""; display: block; height: 2px; width: 100%;
+  border-radius: 1px; margin-top: .45rem;
+  background: var(--red);
+}
+.section-head h2.rule-blue::after     { background: var(--blue); }
+.section-head h2.rule-charcoal::after { background: var(--charcoal); }
+
+.section-foot { margin-top: 1.6rem; }
+.more-link { font-family: var(--font-display); font-weight: 600; border: 0; }
+
+/* ---------- Page header ----------------------------------- */
+/* Kept deliberately shallow: none of these pages carry a subtitle, so the
+   band is a title and nothing else, and every pixel here is a pixel of
+   content pushed below the fold on a 14-inch screen. */
+.page-head {
+  padding: clamp(1.1rem, 2.2vw, 1.65rem) 0 clamp(.9rem, 1.8vw, 1.35rem);
+  border-bottom: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, var(--bg-tint), var(--bg));
+}
+.page-head h1 { margin-bottom: .25em; }
+.page-head h1:only-child { margin-bottom: 0; }
+.page-subtitle { font-size: 1.12rem; color: var(--muted); max-width: 44em; margin: 0; }
+
+.page-body { padding: clamp(1.5rem, 3vw, 2.2rem) 24px clamp(3rem, 6vw, 4.5rem); }
+.page-body > h2:first-child { margin-top: 0; }
+
+/* ---------- Cards ----------------------------------------- */
+.grid { display: grid; gap: 1.6rem; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.6rem 1.6rem 1.7rem;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+/* Cards pick up a coloured outline on hover, stepping through the palette. */
+.grid > .card:nth-child(3n+1):hover { border-color: var(--red); }
+.grid > .card:nth-child(3n+2):hover { border-color: var(--charcoal); }
+.grid > .card:nth-child(3n+3):hover { border-color: var(--blue); }
+/* On the home page the three cards carry the three icons, so their hover
+   outlines take those icons' colours rather than the generic palette walk
+   above: the two-hemisphere icon is red-to-blue, the neural network is
+   charcoal, the brain network the lighter grey (see tools/make_icons.py).
+
+   The gradient is done as two backgrounds rather than a border-image, which
+   would square off the corners: an opaque white fill clipped to the padding
+   box, over the gradient clipped to the border box. */
+.section-tint .grid > .card:nth-child(1):hover {
+  border-color: transparent;
+  background-image: linear-gradient(#fff, #fff),
+                    linear-gradient(120deg, var(--red), var(--blue));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+.section-tint .grid > .card:nth-child(2):hover { border-color: var(--charcoal); }
+.section-tint .grid > .card:nth-child(3):hover { border-color: #83868a; }
+
+.card h3 { margin-top: 0; margin-bottom: .5rem; font-size: 1.13rem; }
+.card p:last-child { margin-bottom: 0; }
+/* The card icons carry their own colour, so the badge is a neutral plate
+   rather than a tinted one. */
+.card .card-icon {
+  height: 52px; margin-bottom: 1rem;
+  display: flex; align-items: center; justify-content: flex-start;
+}
+.card .card-icon img { height: 52px; width: auto; display: block; }
+
+/* ---------- Team ------------------------------------------ */
+/* Six across at full width, so seven people make two rows. The vertical gap
+   is kept tight because the second row's names have to clear the fold. */
+.people { display: grid; gap: 1.5rem 1.5rem; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+
+.person { text-align: left; }
+
+/* Whole photo + name block is one button opening the bio dialog */
+.person-trigger {
+  display: block; width: 100%; padding: 0; border: 0; background: none;
+  text-align: left; cursor: pointer; font: inherit; color: inherit;
+  border-radius: var(--radius);
+}
+.person-trigger:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.person-photo {
+  display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: var(--radius); background: var(--bg-tint);
+  border: 1px solid var(--line); margin-bottom: .6rem;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.person-trigger:hover .person-photo { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+/* Each person's photo outlines in a palette colour on hover. */
+.people > .person:nth-child(3n+1) .person-trigger:hover .person-photo { border-color: var(--red); }
+.people > .person:nth-child(3n+2) .person-trigger:hover .person-photo { border-color: var(--charcoal); }
+.people > .person:nth-child(3n+3) .person-trigger:hover .person-photo { border-color: var(--blue); }
+
+.person-name {
+  display: block; font-family: var(--font-display); font-weight: 600;
+  font-size: 1.04rem; color: var(--ink); line-height: 1.3;
+}
+.person-trigger:hover .person-name { color: var(--blue-dark); }
+
+/* A name in its original script, alongside the Latin one. Quicksand has no
+   CJK coverage, so the stack names the system faces explicitly rather than
+   letting each platform pick its own fallback; slightly lighter and smaller
+   so the two read as one name rather than two. */
+.name-native {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+               "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
+  font-weight: 500; font-size: .94em; color: var(--muted);
+  white-space: nowrap;
+}
+.person-trigger:hover .name-native { color: var(--blue-dark); }
+.dialog-text h2 .name-native { font-size: .8em; }
+
+/* One line each. Most roles fit comfortably at this size; the two long ones
+   are stepped down individually in script rather than shrinking all of them
+   to suit the longest. nowrap is what makes the overflow measurable, and the
+   ellipsis is the backstop if a future role is longer than the floor allows. */
+.person .role {
+  font-size: .89rem; color: var(--muted); margin: .1rem 0 0; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.person-links { display: flex; flex-wrap: wrap; gap: .7rem; font-size: .88rem; }
+.person-links a { border: 0; color: var(--blue-dark); font-weight: 600; }
+.person-links a:hover { color: var(--red-dark); }
+
+/* Placeholder shown when a person has no photo yet */
+.person-photo.placeholder, .dialog-photo.placeholder {
+  display: grid; place-items: center;
+  background: linear-gradient(145deg, #f4f5f6, #eceef0);
+  color: #b9bcc0; font-family: var(--font-display);
+  font-weight: 700; font-size: 2rem; letter-spacing: .04em;
+}
+
+/* ---------- Bio dialog ------------------------------------ */
+.person-dialog {
+  border: 0; border-radius: 12px; padding: 0;
+  /* Every dialog is this wide, whatever its occupant wrote, so moving
+     between people doesn't resize the box under the cursor.
+
+     920px is set by the longest bio — Poppy's, at 250 words over four
+     paragraphs. At this width it wraps to about 77 characters a line and
+     the whole dialog comes to roughly 850px tall, which clears a 14-inch
+     laptop. At the previous 880px the same bio ran to 940px and scrolled.
+     Going wider would fit it more easily but push the measure past 80
+     characters, which is where a line gets hard to track back from. */
+  max-width: 920px; width: calc(100% - 2.5rem);
+  box-shadow: 0 8px 20px rgba(0,0,0,.12), 0 24px 60px rgba(0,0,0,.18);
+  color: var(--body);
+  /* Backstop for a short window or a much longer bio than any of the
+     current ones: scroll rather than spill off the screen. */
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+.person-dialog::backdrop { background: rgba(35,35,38,.45); }
+
+.dialog-close {
+  position: absolute; top: .55rem; right: .7rem;
+  background: none; border: 0; cursor: pointer;
+  font-size: 1.7rem; line-height: 1; color: var(--muted);
+  padding: .2rem .45rem; border-radius: 6px;
+}
+.dialog-close:hover { color: var(--ink); background: var(--bg-tint); }
+
+.dialog-body { display: grid; grid-template-columns: 190px 1fr; gap: 1.7rem; padding: 2rem 2.1rem; }
+.dialog-photo {
+  width: 190px; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: var(--radius); border: 1px solid var(--line); background: var(--bg-tint);
+}
+.dialog-text h2 { margin: 0 0 .15rem; font-size: 1.45rem; }
+.dialog-text .role { font-size: .92rem; color: var(--muted); font-weight: 600; margin: 0 0 .9rem; }
+/* Slightly tighter than body copy: the dialog holds several paragraphs at
+   once and has a fixed height to live within, and 1.6 buys back a line of
+   space every ten without the block reading as cramped. */
+.dialog-text .bio { font-size: .96rem; line-height: 1.6; margin: 0 0 1.1rem; }
+/* markdownify wraps each paragraph, so the spacing lives on those. */
+.dialog-text .bio p { margin: 0 0 .68rem; }
+.dialog-text .bio p:last-child { margin-bottom: 0; }
+/* One bio ends on a full URL used as its own link text. Left to itself it
+   would push the dialog wider than the viewport on a phone. */
+.dialog-text .bio a { overflow-wrap: anywhere; }
+
+/* Below this the photo and the text can no longer sit side by side without
+   squeezing the measure, so the photo moves above the name. */
+@media (max-width: 600px) {
+  .dialog-body { grid-template-columns: 1fr; padding: 1.5rem; gap: 1.1rem; }
+  .dialog-photo { width: 130px; }
+  .dialog-text h2 { font-size: 1.3rem; }
+}
+
+/* ---------- Join us (foot of the Team page) --------------- */
+.join {
+  margin-top: 3.5rem; padding-top: 2.4rem; padding-bottom: 0;
+  border-top: 1px solid var(--line); text-align: center;
+}
+.join > :last-child { margin-bottom: 0; }
+.join h2 { margin-top: 0; }
+.join p { margin-inline: auto; }
+/* Long enough to sit on one line at the page's default width. */
+.join-line { max-width: none; }
+.join-contact { font-size: 1.02rem; margin-top: 1.2rem; }
+.join-contact a { font-weight: 600; }
+
+/* ---------- Photo gallery --------------------------------- */
+.gallery-section { margin-top: 3.5rem; padding-top: 2.2rem; border-top: 1px solid var(--line); }
+.gallery-section .section-head { margin-bottom: 1.6rem; }
+
+/* A single scrolling row rather than a full grid: about three and a half
+   photos are visible, which signals there are more without flooding the
+   page. Scroll-snap keeps them tidy as you drag. */
+.gallery {
+  display: flex; gap: 12px;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  /* As a flex item this would otherwise size to its content and overflow
+     the wrapper rather than scrolling, leaving the arrows nothing to do. */
+  flex: 1 1 0; min-width: 0;
+}
+.gallery::-webkit-scrollbar { display: none; }
+
+/* Arrow buttons sit outside the strip so they never cover a photo. */
+.gallery-wrap { display: flex; align-items: center; gap: .5rem; }
+.gallery-nav {
+  flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--line); background: #fff; cursor: pointer;
+  font-size: 1.5rem; line-height: 1; color: var(--charcoal);
+  display: grid; place-items: center; padding: 0 0 .18em;
+  transition: border-color .15s, color .15s, opacity .15s;
+}
+.gallery-nav:hover:not(:disabled) { border-color: var(--charcoal); color: var(--ink); }
+.gallery-nav:disabled { opacity: .3; cursor: default; }
+.gallery-nav:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.gallery-item {
+  position: relative; padding: 0; border: 0; background: none;
+  cursor: zoom-in; border-radius: var(--radius); overflow: hidden;
+  flex: 0 0 clamp(230px, 28%, 310px);
+  aspect-ratio: 4 / 3;
+  scroll-snap-align: start;
+}
+.gallery-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .3s ease;
+}
+.gallery-item:hover img { transform: scale(1.04); }
+.gallery-item:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.gallery-cap {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  font-size: .78rem; color: #fff; text-align: left;
+  padding: 1.6rem .6rem .5rem;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.7));
+  opacity: 0; transition: opacity .2s;
+}
+.gallery-item:hover .gallery-cap, .gallery-item:focus-visible .gallery-cap { opacity: 1; }
+
+.lightbox {
+  border: 0; padding: 0; background: none;
+  max-width: min(1100px, 94vw); max-height: 94vh;
+}
+.lightbox::backdrop { background: rgba(20,20,22,.88); }
+.lightbox img {
+  max-width: 100%; max-height: 84vh; width: auto; height: auto;
+  border-radius: var(--radius); display: block; margin: 0 auto;
+}
+.lightbox-cap {
+  color: #e8e9ea; font-size: .88rem; text-align: center; margin: .8rem 0 0;
+}
+.lightbox-close {
+  position: absolute; top: -2px; right: 2px; z-index: 2;
+  background: none; border: 0; color: #fff; cursor: pointer;
+  font-size: 2rem; line-height: 1; padding: .1em .3em;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+}
+
+.contact-line { margin-bottom: 0; }
+.contact-line a { font-weight: 600; }
+
+/* ---------- Alumni ---------------------------------------- */
+/* The gap below the last name matches the gap above the heading: the list's
+   final row drops its padding, and the next section's margin supplies the
+   same 2.2rem the padding-top does. */
+.alumni { margin-top: 2.2rem; padding-top: 2.2rem; border-top: 1px solid var(--line); }
+.alumni h2 { margin: 0 0 1.15rem; font-size: 1.28rem; }
+.alumni-list { list-style: none; padding: 0; margin: 0; }
+/* Name and affiliation are two aligned columns, so the affiliations line up
+   down the page across both Alumni and Collaborators. */
+.alumni-list li, .collab-list li {
+  padding: .55rem 0; border-bottom: 1px solid var(--line-soft); margin: 0;
+  display: grid; grid-template-columns: minmax(0, 17em) minmax(0, 1fr);
+  gap: .15rem 1.5rem; align-items: baseline;
+}
+.alumni-list li:last-child, .collab-list li:last-child {
+  border-bottom: 0; padding-bottom: 0;
+}
+.alumni-name { font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+
+/* Collaborators are a longer list of shorter lines, so they run in columns
+   rather than down the full width of the page. */
+.collab-list { list-style: none; padding: 0; margin: 0; }
+@media (max-width: 700px) {
+  .alumni-list li, .collab-list li { grid-template-columns: 1fr; }
+}
+.alumni-role { font-size: .92rem; color: var(--muted); }
+
+/* ---------- Funders --------------------------------------- */
+.funders { margin-top: 3.5rem; padding-top: 2.2rem; border-top: 1px solid var(--line); }
+.funders h2 { margin-top: 0; font-size: 1.28rem; }
+
+/* Three across at the page's default width; stacking only when narrow. */
+.funder-row {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem; margin: 1.5rem 0; align-items: stretch;
+}
+.funder {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: #fff; padding: 0 2rem;
+  display: grid; place-items: center; height: 132px; min-width: 0;
+  transition: border-color .18s, box-shadow .18s;
+}
+.funder:hover { border-color: #d0d2d5; box-shadow: var(--shadow); }
+/* Logos vary a lot in aspect ratio — contain within a fixed box so they
+   appear at comparable visual weight regardless of their proportions. */
+.funder img { max-height: 72px; max-width: 100%; width: auto; object-fit: contain; }
+
+@media (max-width: 640px) {
+  .funder-row { grid-template-columns: 1fr; }
+  .funder { height: 104px; padding: 0 1.5rem; }
+  .funder img { max-height: 56px; }
+}
+.funder-wordmark {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: .98rem; color: var(--charcoal); text-align: center;
+  letter-spacing: .01em;
+}
+.acknowledgement { font-size: .9rem; color: var(--muted); }
+
+/* ---------- Publications ---------------------------------- */
+/* The heading sits directly on top of the sticky bar, so it keeps only
+   enough space beneath it to read as a pair with it. */
+[data-rail-top] { margin-bottom: .8rem; }
+/* No override here: the heading takes the standard section rule — the width
+   of its own words, in a palette colour — so it matches "Highlights" above
+   it. Only the space beneath it is tightened, since the sticky year bar
+   follows immediately. */
+.pub-year-jump {
+  /* Each chip is given its own --chip in script: a position along the
+     red-charcoal-blue gradient, newest to oldest. Charcoal is the fallback
+     for no-JS, where the chips are plain jump links. */
+  --chip: var(--charcoal);
+  font-family: var(--font-display); font-weight: 600; font-size: .87rem;
+  padding: .35em .8em; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--charcoal);
+  transition: border-color .18s, box-shadow .18s, color .18s;
+}
+/* Outlined rather than filled: twelve solid blocks of colour shouted over
+   the list they belong to. The ring is thickened with an inset shadow
+   instead of a wider border, so nothing shifts as chips light and unlight. */
+.pub-year-jump:hover,
+.pub-year-jump.on {
+  background: transparent;
+  border-color: var(--chip);
+  box-shadow: inset 0 0 0 1px var(--chip);
+  color: var(--chip);
+}
+
+/* Jumping to a year must not land it underneath the sticky header — or the
+   year rail, when that is switched on. The script refines this figure from
+   the measured heights; this is the no-script fallback. */
+.pub-year { scroll-margin-top: 92px; }
+.pub-year { font-size: 1.3rem; margin-top: 2.6rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+.pub-year:first-of-type { margin-top: 0; }
+
+.pub-list { list-style: none; padding: 0; margin: 0; }
+
+.pub {
+  padding: 1.15rem 0 1.15rem 1.1rem;
+  border-bottom: 1px solid var(--line-soft);
+  border-left: 3px solid transparent;
+  padding-left: 1.1rem;
+  transition: border-color .18s, background .18s;
+  margin: 0;
+}
+/* Hover accent steps through the palette down each list. */
+.pub:hover { background: var(--bg-tint); }
+.pub-list > .pub:nth-child(4n+1):hover { border-left-color: var(--red); }
+.pub-list > .pub:nth-child(4n+2):hover { border-left-color: var(--charcoal); }
+.pub-list > .pub:nth-child(4n+3):hover { border-left-color: var(--blue); }
+.pub-list > .pub:nth-child(4n+4):hover { border-left-color: var(--charcoal); }
+.pub-title {
+  font-family: var(--font-display); font-weight: 600; color: var(--ink);
+  font-size: 1.03rem; display: block; margin-bottom: .25rem; border: 0;
+}
+/* The title is the link to the publisher — underline only on hover so the
+   list stays readable, with an external-link cue. */
+a.pub-title { text-decoration: none; }
+a.pub-title:hover { color: var(--blue-dark); text-decoration: underline; text-underline-offset: 3px; }
+a.pub-title::after {
+  content: "↗"; font-size: .72em; margin-left: .35em;
+  color: var(--muted); vertical-align: .1em;
+}
+a.pub-title:hover::after { color: var(--blue); }
+/* Fallback search links get a magnifier instead of the external-link arrow */
+a.pub-title.is-search::after { content: "⌕"; font-size: .95em; }
+/* Selected publications highlight only under the cursor, stepping down the
+   field-strength gradient by position: red, charcoal, blue. */
+.pub-compact { padding-top: .8rem; padding-bottom: .8rem; }
+.pub-compact:hover { background: var(--bg-tint); }
+.pub-compact:nth-child(1):hover { border-left-color: var(--red); }
+.pub-compact:nth-child(2):hover { border-left-color: var(--charcoal); }
+.pub-compact:nth-child(3):hover { border-left-color: var(--blue); }
+.pub-note { font-size: .85rem; color: var(--muted); margin: .3rem 0 0; }
+.pub-authors { font-size: .93rem; color: var(--body); margin-bottom: .2rem; }
+.pub-authors strong { font-weight: 700; color: var(--ink); }
+.pub-venue { font-size: .9rem; color: var(--muted); font-style: italic; }
+.pub-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .55rem; }
+.tag {
+  font-family: var(--font-display); font-weight: 600; font-size: .74rem;
+  letter-spacing: .03em; text-transform: uppercase;
+  padding: .22em .6em; border-radius: 4px; border: 0;
+  background: var(--bg-tint); color: var(--muted);
+}
+.tag.doi     { background: rgba(30,115,166,.1);  color: var(--blue-dark); }
+.tag.preprint{ background: rgba(207,72,50,.09);  color: var(--red-dark); }
+.tag.code    { background: rgba(77,77,77,.09);   color: var(--charcoal); }
+.tag.pdf     { background: rgba(77,77,77,.09);   color: var(--charcoal); }
+.tag.data    { background: rgba(30,115,166,.1);  color: var(--blue-dark); }
+a.tag:hover { filter: brightness(.93); }
+
+/* ---------- News ------------------------------------------ */
+.news-list { list-style: none; padding: 0; margin: 0; }
+.news-title { font-size: 1.15rem; margin: 0 0 .3rem; }
+.news-entry {
+  display: grid; grid-template-columns: 128px 1fr; gap: 1.6rem;
+  padding: 1.5rem 0; border-bottom: 1px solid var(--line-soft); margin: 0;
+}
+.news-entry .news-date {
+  font-family: var(--font-display); font-weight: 600; font-size: .85rem;
+  color: var(--muted); letter-spacing: .02em; padding-top: .2rem; margin: 0;
+}
+.news-entry h3 { margin: 0 0 .35rem; font-size: 1.08rem; }
+.news-entry h3 a { border: 0; color: var(--ink); }
+.news-entry h3 a:hover { color: var(--blue-dark); }
+.news-entry p { margin: 0; font-size: .96rem; }
+/* The index carries whole posts, so the entry holds paragraphs and lists
+   rather than a single line of summary. */
+.news-full > * + * { margin-top: .7rem; }
+.news-full ul { margin: .7rem 0 0; padding-left: 1.15rem; }
+.news-full li { font-size: .96rem; margin-bottom: .45rem; }
+.news-full li:last-child { margin-bottom: 0; }
+.news-full .news-hero { margin: .2rem 0 .9rem; max-width: 100%; height: auto; }
+
+.news-hero { border-radius: var(--radius); margin-bottom: 1.8rem; }
+.page-head .news-date { color: var(--red); font-family: var(--font-display); font-weight: 700; font-size: .82rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .5rem; }
+
+.back-link { margin-top: 3rem; font-family: var(--font-display); font-weight: 600; }
+
+/* Compact news on home page */
+.news-compact { list-style: none; padding: 0; margin: 0; }
+.news-compact li { padding: .85rem 0; border-bottom: 1px solid var(--line-soft); margin: 0; }
+.news-compact .d { font-family: var(--font-display); font-weight: 600; font-size: .8rem; color: var(--muted); display: block; }
+.news-compact a { border: 0; font-weight: 600; color: var(--ink); }
+.news-compact a:hover { color: var(--blue-dark); }
+
+/* ---------- Research -------------------------------------- */
+.overview-grid {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  gap: clamp(1.5rem, 4vw, 3.25rem); align-items: start;
+}
+/* The opening sentence is the one that names all four strands at once, so it
+   still reads as the lead — but through weight and colour only. It used to be
+   set larger as well, which on a wide screen, where the body type steps up,
+   made the size difference obvious enough to look like a mistake. */
+.overview > p:first-child { font-weight: 600; color: var(--ink); }
+.overview > p { margin-bottom: .95em; }
+.overview > p:last-child { margin-bottom: 0; }
+.overview strong { color: var(--ink); font-weight: 700; }
+
+@media (max-width: 860px) {
+  /* On one column the diagram goes above the prose and stays pinned there,
+     so tapping a region still shows its sentence lighting up — on a phone
+     the two are otherwise never on screen at the same time, which is the
+     whole point of the thing.
+
+     Flex rather than a one-column grid: a sticky item in a grid can only
+     travel within its own grid area, which here is exactly its own height,
+     so it would never move. In a flex column the containing block is the
+     whole container, and the diagram stays put until the prose runs out —
+     which is where Projects and datasets begins. */
+  .overview-grid {
+    display: flex; flex-direction: column;
+    gap: 1.1rem;
+  }
+  .venn {
+    order: -1;
+    position: sticky; top: 66px; z-index: 5;   /* 65px header, plus one */
+    margin: 0 auto; width: 100%; max-width: 330px;
+    /* Opaque, or the prose shows through as it passes underneath. The soft
+       shadow is what makes "passing underneath" legible rather than odd. */
+    background: var(--bg);
+    padding-bottom: .5rem;
+    box-shadow: 0 8px 12px -10px rgba(0,0,0,.35);
+  }
+  /* The caption says what the four labels already say, and the room it takes
+     is room the prose does not get. */
+  .venn figcaption { display: none; }
+  .venn-hint { margin-top: .5rem; }
+}
+
+/* Field-strength range strip */
+/* Poles size to their content; the gradient track absorbs the rest, so it
+   always spans the full distance between the two field strengths. */
+.field-range {
+  display: grid; grid-template-columns: auto minmax(40px, 1fr) auto;
+  align-items: center; gap: 1.5rem;
+  margin: 2.75rem 0 1rem; padding: 1.75rem;
+  background: var(--bg-tint); border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+}
+.field-pole { display: flex; flex-direction: column; gap: .18rem; max-width: 15em; }
+.field-pole.high { text-align: right; }
+.field-value { font-family: var(--font-display); font-weight: 700; font-size: 1.55rem; line-height: 1.1; }
+.field-pole.low .field-value { color: var(--blue); }
+.field-pole.high .field-value { color: var(--red); }
+.field-label {
+  font-family: var(--font-display); font-weight: 700; font-size: .74rem;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--charcoal);
+}
+.field-note { font-size: .87rem; color: var(--muted); }
+.field-track {
+  width: 100%; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--charcoal), var(--red));
+}
+
+/* ---------- Scan comparison slider ------------------------ */
+.scan-compare { margin: 0; max-width: 500px; --slice-col: 22px; --slice-gap: .75rem; }
+.scan-body { display: flex; gap: var(--slice-gap); align-items: stretch; }
+
+/* Gradient frame: red at the top left (high field), logo grey through the
+   middle, blue at the bottom right (low field) — the same axis the wipe
+   travels along. Built as padding on a gradient background. */
+.scan-frame {
+  flex: 1 1 auto; padding: 6px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--red) 0%, var(--charcoal) 50%, var(--blue) 100%);
+  transition: background .12s linear;
+}
+.scan-stage {
+  position: relative; aspect-ratio: 1 / 1; overflow: hidden;
+  border-radius: 9px; background: #000;
+  user-select: none; touch-action: pan-y;
+}
+/* Both layers are sprite sheets; background-size and position are set in JS. */
+.scan-img {
+  position: absolute; inset: 0;
+  background-repeat: no-repeat; background-color: #000;
+}
+/* The high-field layer is revealed by a clip-path polygon whose edge runs
+   perpendicular to the top-left/bottom-right diagonal. Set in JS. */
+.scan-over { clip-path: polygon(0 0, 100% 0, 0 100%); z-index: 2; }
+
+/* The divider is a bar rotated onto that diagonal edge, centred at (t, t).
+   Its solid colour is set in JS and tracks the dominant scan. */
+.scan-divider {
+  position: absolute; left: 50%; top: 50%;
+  width: 220%; height: 3px;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: center;
+  background: var(--charcoal);
+  pointer-events: none; z-index: 3;
+}
+/* The grip sits inside the already-rotated divider, so it inherits -45deg.
+   A further 90deg puts its arrows at +45deg — perpendicular to the boundary
+   and along the drag axis, pointing up-left and down-right. */
+.scan-grip {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.45);
+}
+.scan-grip::before, .scan-grip::after {
+  content: ""; position: absolute; top: 50%; width: 0; height: 0;
+  border-block: 5px solid transparent; transform: translateY(-50%);
+}
+/* Arrows follow what dragging that way does: up-left reveals more low field
+   (blue), down-right reveals more high field (red). */
+.scan-grip::before { left: 7px;  border-right: 6px solid var(--blue); }
+.scan-grip::after  { right: 7px; border-left:  6px solid var(--red); }
+
+/* Font size is set in JS and tracks each scan's share of the frame. */
+.scan-label {
+  position: absolute; z-index: 5;
+  font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+  letter-spacing: .04em; line-height: 1.2;
+  padding: .28em .6em; border-radius: 5px; pointer-events: none;
+  background: rgba(0,0,0,.4);
+  text-shadow: 0 1px 3px rgba(0,0,0,.9);
+  transition: font-size .08s linear;
+}
+/* Lightened from the palette so they carry against the black background. */
+.scan-label-tl { top: .65rem; left: .65rem; color: #ff8064; }
+.scan-label-br { bottom: .65rem; right: .65rem; color: #6ab8ea; }
+
+/* The wipe control is a full-bleed invisible range input, so the whole image
+   is draggable while staying keyboard and screen-reader usable. */
+.scan-range {
+  position: absolute; inset: 0; z-index: 4;
+  width: 100%; height: 100%; margin: 0; padding: 0;
+  opacity: 0; cursor: nwse-resize; appearance: none; background: none;
+}
+.scan-range::-webkit-slider-thumb { appearance: none; width: 44px; height: 100vh; }
+.scan-range::-moz-range-thumb { width: 44px; height: 100vh; border: 0; }
+.scan-range:focus-visible { opacity: 1; outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* Vertical slice selector alongside the image */
+.scan-slice {
+  flex: 0 0 auto; display: flex; flex-direction: column;
+  align-items: center; gap: .5rem; padding: .2rem 0;
+}
+.scan-slice-range {
+  appearance: none; -webkit-appearance: none;
+  writing-mode: vertical-lr; direction: rtl;
+  width: var(--slice-col, 22px); flex: 1 1 auto; margin: 0; background: none; cursor: ns-resize;
+}
+.scan-slice-range::-webkit-slider-runnable-track {
+  width: 5px; border-radius: 3px;
+  background: linear-gradient(180deg, var(--charcoal), var(--line));
+}
+.scan-slice-range::-moz-range-track {
+  width: 5px; border-radius: 3px;
+  background: linear-gradient(180deg, var(--charcoal), var(--line));
+}
+.scan-slice-range::-webkit-slider-thumb {
+  appearance: none; -webkit-appearance: none;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--charcoal); margin-left: -6px;
+}
+.scan-slice-range::-moz-range-thumb {
+  width: 17px; height: 17px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--charcoal);
+}
+.scan-slice-range:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+.scan-sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Offset by the slice column so the caption centres under the image,
+   not under the image plus its slider. */
+.scan-compare figcaption {
+  font-size: .78rem; color: var(--muted); margin-top: .85rem;
+  text-align: center; line-height: 1.5;
+  padding-right: calc(var(--slice-col) + var(--slice-gap));
+  white-space: nowrap;
+}
+/* Below the point where it would overflow, let it wrap again. */
+@media (max-width: 540px) {
+  .scan-compare figcaption { white-space: normal; font-size: .82rem; }
+}
+.scan-compare figcaption sup { font-size: .72em; vertical-align: .45em; }
+
+/* Venn diagram */
+.venn { margin: 2.5rem auto 0; max-width: 480px; text-align: center; }
+.venn-stage { position: relative; }
+.venn-stage svg { width: 100%; height: auto; display: block; }
+/* The mini logo ("hl") is near-square, so it needs a squarer plate than the
+   full stacked logo did. */
+.venn-logo {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12%; height: auto;
+  padding: 3.4% 4%;
+  background: #fff;
+  border: 2px solid var(--charcoal);
+  border-radius: 12px;
+  box-sizing: content-box;
+}
+/* Shown only where the diagram is driven by taps rather than a cursor. The
+   class is added in script, from the same media query the handlers use, so
+   the hint cannot appear on a device that hovers. */
+.venn-hint { display: none; }
+.venn.is-tappable .venn-hint {
+  display: block;
+  font-family: var(--font-display); font-weight: 600;
+  font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin: .9rem 0 0;
+}
+.venn.is-tappable .venn-surface { cursor: pointer; }
+
+.venn figcaption {
+  font-size: .9rem; color: var(--muted);
+  margin-top: 1.1rem; max-width: 34em; margin-inline: auto;
+}
+
+.research-block { margin-top: 3.5rem; }
+.section-lead { color: var(--muted); margin: -.4rem 0 0; }
+/* Only shown while two drafts of a section are on the page together. */
+.draft-marker {
+  font-family: var(--font-display); font-weight: 700; font-size: .74rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--red);
+  margin: 0 0 .3rem;
+}
+.research-block .section-head { margin-bottom: 1.8rem; }
+.card-short {
+  font-family: var(--font-display); font-weight: 600;
+  color: var(--charcoal); font-size: .96rem; margin-bottom: .7rem;
+}
+.card p:last-child { margin-bottom: 0; }
+
+/* Datasets */
+.dataset-list { display: grid; gap: 0; }
+.dataset {
+  display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 2fr);
+  gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid var(--line-soft);
+}
+.dataset:last-child { border-bottom: 0; }
+.dataset h3 { margin: 0; font-size: 1.1rem; }
+.dataset-full { font-size: .87rem; color: var(--muted); margin: .25rem 0 0; }
+/* These separate two kinds of entry, so they have to read as labels rather
+   than as another line of the list. Sized up, and given the same thin rule
+   the section headings use, at half weight. */
+.dataset-group {
+  font-size: 1.16rem; margin: 2.4rem 0 .9rem; color: var(--ink);
+  width: fit-content;
+}
+.dataset-group::after {
+  content: ""; display: block; height: 2px; width: 100%;
+  border-radius: 1px; margin-top: .35rem;
+  background: var(--line);
+}
+.dataset-group:first-of-type { margin-top: 1.4rem; }
+/* The dataset name is plain text; the link to the repository sits at the end
+   of its description instead, where it reads as a destination. */
+.dataset-link { margin: .5rem 0 0; font-size: .9rem; }
+.dataset-link a { font-family: var(--font-display); font-weight: 600; border: 0; }
+.dataset-link a::after { content: " ↗"; }
+.dataset-body > p:last-child { margin-bottom: 0; }
+.dataset-body { font-size: .97rem; }
+
+@media (max-width: 700px) {
+  .field-range { grid-template-columns: 1fr; gap: 1.1rem; text-align: left; }
+  .field-pole.high { text-align: left; }
+  .field-track { width: 100%; }
+  .dataset { grid-template-columns: 1fr; gap: .6rem; }
+}
+
+/* ---------- Resources ------------------------------------- */
+.resource {
+  display: flex; gap: 1.1rem; align-items: flex-start;
+  padding: 1.35rem 0; border-bottom: 1px solid var(--line-soft);
+}
+.resource:last-child { border-bottom: 0; }
+.resource-mark {
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: 9px;
+  display: grid; place-items: center; font-family: var(--font-display);
+  font-weight: 700; font-size: .95rem;
+  background: rgba(30,115,166,.1); color: var(--blue-dark);
+}
+.resource h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
+.resource p { margin: 0 0 .4rem; font-size: .95rem; }
+
+/* ---------- Callout --------------------------------------- */
+.callout h3 { margin-bottom: 1rem; }
+.callout {
+  background: var(--bg-warm);
+  border: 1px solid var(--callout-line, #f0e2dd);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.7rem;
+  margin: 2.4rem 0;
+}
+.callout h3 { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+.callout.blue { background: #f5f9fc; border-color: #dce9f1; border-left-color: var(--blue); }
+
+/* ---------- Footer ---------------------------------------- */
+/* Slim by design: a mark on the left, three lines on the right. */
+.site-footer {
+  margin-top: 0;
+  background: var(--bg-tint);
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 0;
+  font-size: .88rem;
+}
+/* Logo hard left, text hard right. */
+.footer-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1.5rem;
+}
+.footer-mark { flex: 0 0 auto; border: 0; display: block; }
+.footer-mark img { height: 56px; width: auto; }
+.footer-lines { display: flex; flex-direction: column; gap: .1rem; text-align: right; }
+.footer-lines p { margin: 0; color: var(--muted); line-height: 1.5; }
+.footer-name {
+  font-family: var(--font-display); font-weight: 600;
+  color: var(--ink) !important;
+}
+.footer-lines a { font-weight: 600; }
+
+@media (max-width: 560px) {
+  .footer-inner { gap: .9rem; }
+  .footer-mark img { height: 46px; }
+  .site-footer { font-size: .82rem; }
+}
+
+/* ---------- Responsive ------------------------------------ */
+@media (max-width: 880px) {
+  @supports (height: 100svh) {
+  .hero { min-height: calc(100svh - 84px); }
+}
+
+.hero-grid { grid-template-columns: 1fr; }
+  .hero-visual { order: -1; }
+  .hero-logo { max-width: 230px; }
+  .theme { grid-template-columns: 1fr; gap: 1.2rem; }
+}
+
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .nav-toggle { display: block; }
+  .header-inner { flex-wrap: wrap; min-height: 64px; }
+  .brand img { height: 32px; }
+  .site-nav {
+    display: none; flex-direction: column; align-items: stretch;
+    width: 100%; padding-bottom: .9rem; gap: 0;
+  }
+  .site-nav.is-open { display: flex; }
+  .site-nav a { padding: .72rem .3rem; border-bottom: 1px solid var(--line-soft); border-radius: 0; }
+  .site-nav a.active::after { left: .3rem; right: auto; width: 26px; bottom: .35rem; }
+  .news-title { font-size: 1.15rem; margin: 0 0 .3rem; }
+.news-entry { grid-template-columns: 1fr; gap: .35rem; }
+  .people { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 1.7rem 1.1rem; }
+  .person-name { font-size: .97rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Print ----------------------------------------- */
+@media print {
+  .site-header, .site-footer, .gradient-bar, .nav-toggle, .pub-filters { display: none; }
+  body { font-size: 11pt; color: #000; }
+  a { color: #000; border: 0; }
+}
+
+/* ============================================================
+   Interactive prototypes. Each block pairs with a flag in
+   _config.yml under `interactive:` — turning the flag off
+   removes the script, and these rules then do nothing.
+   ============================================================ */
+
+/* ---- nav underline that follows the cursor ---------------- */
+.site-nav { position: relative; }
+.nav-slider {
+  position: absolute; bottom: .18rem; left: 0; height: 2px;
+  border-radius: 2px; background: var(--gradient);
+  opacity: 0; pointer-events: none;
+  transition: transform .22s cubic-bezier(.4,0,.2,1), width .22s, opacity .18s;
+}
+/* the static rule is redundant once the slider is running */
+.site-nav:has(.nav-slider) a.active::after { display: none; }
+
+/* ---- Venn regions filtering the approach cards ------------ */
+/* The transparent rect on top of the rings is what receives the pointer;
+   the script then decides which circles contain that point. Everything
+   else in the SVG has to stay out of its way. */
+.venn-surface { fill: transparent; }
+/* Focusable so the diagram is reachable without a pointer. The outline is
+   drawn on the ring rather than the group's bounding box, which for a circle
+   would be a rectangle the size of the whole figure. */
+.venn-part:focus { outline: none; }
+.venn-part:focus-visible .venn-ring { stroke-width: 6; stroke-dasharray: 10 6; }
+.venn-keyhint {
+  font-size: .78rem; color: var(--muted); margin: .5rem 0 0;
+}
+/* Shown only to keyboard users, once something in the figure has focus. */
+.venn-keyhint { opacity: 0; transition: opacity .18s; }
+.venn:focus-within .venn-keyhint { opacity: 1; }
+.venn-ring, .venn-label, .venn-logo { pointer-events: none; }
+
+.venn-part { transition: opacity .18s; }
+.venn-part .venn-ring { transition: stroke-width .18s, opacity .18s; }
+.venn-part.is-faded { opacity: .22; }
+.venn-part.is-lit .venn-ring { stroke-width: 3.6; opacity: 1; }
+
+/* The wash filling the hovered region itself. Built in script — one clipped,
+   masked shape per region, carrying a gradient through the colours of the
+   circles it belongs to. */
+.venn-fill { opacity: 0; transition: opacity .18s; pointer-events: none; }
+.venn-fill.is-on { opacity: .3; }
+
+/* In the middle, where all four meet, the plate behind the logo shades with
+   the same four-colour wash as the region under it. The logo artwork has a
+   transparent background, so the tint reads through it. */
+.venn-logo { transition: transform .18s, box-shadow .18s, border-color .18s; }
+.venn-logo.is-lit {
+  transform: translate(-50%, -50%) scale(1.05);
+  border-color: var(--charcoal-dark);
+  box-shadow: 0 3px 16px rgba(0,0,0,.14);
+  background-image: linear-gradient(100deg, rgba(207,72,50,.22), rgba(30,115,166,.22) 38%,
+                                            rgba(154,157,161,.30) 70%, rgba(77,77,77,.22));
+}
+
+/* The labels used to inherit these from a wrapping <g>. */
+.venn-label {
+  font-family: var(--font-display); font-weight: 600; font-size: 19px;
+  fill: #3a3a3a; text-anchor: middle;
+}
+
+/* ---- prose that answers to the Venn ------------------------
+   A sentence about one circle takes that circle's colour. A sentence about
+   an intersection stays in ink and is washed with the colours of the circles
+   it belongs to, left to right — so the highlight itself says which
+   combination you are hovering. Tints are kept faint: the sentence has to
+   stay comfortable to read while it is lit. */
+.overview [data-set] {
+  border-radius: 4px;
+  padding: .08em .2em; margin: 0 -.2em;
+  transition: color .2s, background-color .2s;
+}
+
+.overview [data-set="hf"].is-lit { color: var(--red-dark);      background-color: rgba(207,72,50,.13); }
+.overview [data-set="lf"].is-lit { color: var(--blue-dark);     background-color: rgba(30,115,166,.13); }
+.overview [data-set="nn"].is-lit { color: #6f7377;              background-color: rgba(154,157,161,.24); }
+.overview [data-set="bn"].is-lit { color: var(--charcoal-dark); background-color: rgba(77,77,77,.14); }
+
+.overview [data-set].is-lit[data-set*=" "] { color: var(--ink); }
+
+.overview [data-set="hf lf"].is-lit {
+  background-image: linear-gradient(100deg, rgba(207,72,50,.17), rgba(30,115,166,.17));
+}
+.overview [data-set="lf nn"].is-lit {
+  background-image: linear-gradient(100deg, rgba(30,115,166,.17), rgba(154,157,161,.26));
+}
+.overview [data-set="hf bn"].is-lit {
+  background-image: linear-gradient(100deg, rgba(207,72,50,.17), rgba(77,77,77,.18));
+}
+.overview [data-set="nn bn"].is-lit {
+  background-image: linear-gradient(100deg, rgba(154,157,161,.26), rgba(77,77,77,.18));
+}
+.overview [data-set="hf lf nn"].is-lit {
+  background-image: linear-gradient(100deg, rgba(207,72,50,.17), rgba(30,115,166,.17) 55%, rgba(154,157,161,.26));
+}
+.overview [data-set="hf lf bn"].is-lit {
+  background-image: linear-gradient(100deg, rgba(207,72,50,.17), rgba(30,115,166,.17) 55%, rgba(77,77,77,.18));
+}
+.overview [data-set="hf lf nn bn"].is-lit {
+  background-image: linear-gradient(100deg, rgba(207,72,50,.17), rgba(30,115,166,.17) 38%,
+                                            rgba(154,157,161,.26) 70%, rgba(77,77,77,.18));
+}
+
+/* ---- publication year rail -------------------------------- */
+.pub-filters.is-rail {
+  position: sticky; top: 76px; z-index: 20;   /* refined in script */
+  padding: .6rem 0; margin-bottom: 2.2rem;
+}
+/* The painted bar is a pseudo-element rather than the nav's own background,
+   for two reasons: it has to span the full column (the chips only occupy
+   part of the width), and it overhangs upwards by 24px so that no sliver of
+   scrolling content can ever appear between it and the header. The header
+   sits at z-index 50, so the overhang is hidden underneath it. */
+/* The overhang exists so no sliver of scrolling content can appear between
+   the bar and the header. 24px was generous — and since this pseudo-element
+   sits in the bar's stacking context at z-index 20, that overhang painted
+   opaque white straight over the rule under the "Full list" heading above.
+   6px is enough to cover any rounding, and clears the heading. */
+.pub-filters.is-rail::before {
+  content: ""; position: absolute; inset: -6px -24px 0;
+  background: var(--rail-bg, rgba(255,255,255,.97));
+  backdrop-filter: saturate(160%) blur(8px);
+  z-index: -1;
+}
+/* The lit colour comes from --chip, set beside the base rule above. */
+
+/* ---- expandable dataset entries --------------------------- */
+.dataset-toggle {
+  display: block; width: 100%; text-align: left; padding: 0;
+  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
+  position: relative; padding-right: 1.6rem;
+}
+.dataset-toggle::after {
+  content: "−"; position: absolute; right: .2rem; top: 0;
+  font-family: var(--font-display); font-size: 1.3rem; line-height: 1;
+  color: var(--muted);
+}
+.dataset.is-closed .dataset-toggle::after { content: "+"; }
+.dataset-toggle:hover h3 { color: var(--blue-dark); }
+.dataset-toggle:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.dataset.is-closed .dataset-body { display: none; }
+
+/* ---- copy-reference button -------------------------------- */
+.pub { position: relative; }
+.cite-btn {
+  position: absolute; top: 1.05rem; right: 0;
+  font-family: var(--font-display); font-weight: 600; font-size: .74rem;
+  padding: .25em .7em; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: #fff; color: var(--muted);
+  opacity: 0; transition: opacity .15s, color .15s, border-color .15s;
+}
+.pub:hover .cite-btn, .cite-btn:focus-visible { opacity: 1; }
+.cite-btn:hover { color: var(--ink); border-color: var(--charcoal); }
+.cite-btn.done { color: var(--blue-dark); border-color: var(--blue); opacity: 1; }
+
+/* ---- highlights band -------------------------------------- */
+.highlights { margin-bottom: 1.2rem; }
+.highlight-row {
+  display: grid; gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.highlight {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; background: #fff;
+  /* Column layout so the reference sits on the floor of the card whatever
+     length the takeaway above it runs to, and the three line up. */
+  display: flex; flex-direction: column;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.highlight:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.highlight-row > .highlight:nth-child(3n+1):hover { border-color: var(--red); }
+.highlight-row > .highlight:nth-child(3n+2):hover { border-color: var(--charcoal); }
+.highlight-row > .highlight:nth-child(3n+3):hover { border-color: var(--blue); }
+/* contain, not cover: these are figures, and cropping one cuts off an axis
+   or a panel. The card letterboxes whatever aspect ratio it is given, so a
+   wide strip and a squarer plate both sit correctly. */
+.highlight img {
+  width: 100%; aspect-ratio: 900 / 385; object-fit: contain;
+  background: #fff; padding: 4px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.highlight-title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: .95rem; color: var(--ink); line-height: 1.42;
+  margin: .25rem 1rem 0;
+}
+.highlight-take {
+  font-size: .88rem; color: var(--body); margin: 0 1rem 0; line-height: 1.5;
+}
+.highlight-ref {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: .78rem; color: var(--muted);
+  /* Shorthand first: putting it after margin-top would reset that to 0. */
+  margin: 0 1rem .45rem;
+  margin-top: auto;
+}
+
+/* Four named rows — figure, title, takeaway, reference — so the cards can
+   line those up with each other rather than each packing its own contents.
+   Flexbox cannot do this: it aligns within a card, never across siblings.
+   Subgrid can, by letting each card borrow the row lines of the row above
+   it. The flex fallback below runs where subgrid is unavailable. */
+@supports (grid-template-rows: subgrid) {
+  /* All four rows sized to their content, not one of them stretching to
+     fill: with every card spanning the same rows they end level anyway, and
+     a 1fr row here just opens a gap above the reference. */
+  .highlight-row { grid-template-rows: auto auto auto auto; }
+  .highlight {
+    display: grid; grid-row: span 4; grid-template-rows: subgrid;
+  }
+  /* The takeaway occupies the 1fr row, so the reference below it is already
+     on the floor of every card. */
+  .highlight-ref { margin-top: 0; }
+}
+@media (max-width: 760px) {
+  /* One column: the cards stack into implicit rows and there is nothing
+     left to align across. */
+  .highlight-row { grid-template-rows: none; }
+  .highlight { grid-row: auto; grid-template-rows: none; display: flex; }
+}
+
+@media (max-width: 700px) {
+  .cite-btn { position: static; opacity: 1; margin-top: .6rem; }
+}
+
+/* ============================================================
+   Filter box, year counts, co-author graph, and the null-model
+   easter egg. All flag-guarded in _config.yml; with the flags
+   off these rules match nothing.
+   ============================================================ */
+
+/* The heading and the filter share a row, so the buttons' right edge lines
+   up with the right end of the year bar below. */
+[data-rail-top] {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1.2rem; flex-wrap: wrap;
+}
+[data-rail-top] h2 { width: auto; flex: 0 0 auto; }
+
+/* ---- strand markers and filters ----------------------------
+   The markers are the same brains as "Our work" on the home page: the
+   two-hemisphere icon in one colour for each field strength, and the two
+   network icons in their own greys. They run down the right-hand edge of
+   an entry, one under another, so four fit alongside the shortest one. */
+.pub { position: relative; }
+.pub-strands {
+  position: absolute; top: 1.15rem; right: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  opacity: .82;
+}
+.strand { display: block; width: 20px; height: auto; }
+/* The list needs room for the column, or long titles run under it. */
+.pub-title, .pub-authors, .pub-venue, .pub-tags { padding-right: 34px; }
+
+/* The same four colours as swatches, inside the filter buttons. */
+/* Restored: replacing the block above once took these with it, and the
+   buttons fell back to the browser's own. */
+.strand-btn {
+  display: inline-flex; align-items: center; gap: .42em;
+  font-family: var(--font-display); font-weight: 600; font-size: .82rem;
+  color: var(--charcoal); background: none;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: .34em .78em; cursor: pointer;
+  transition: border-color .18s, color .18s, box-shadow .18s;
+}
+.strand-btn:hover { color: var(--ink); border-color: var(--charcoal); }
+.strand-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+/* Pressed: outlined in its own colour, the same treatment the year chips get. */
+.strand-btn-hf.is-on { color: var(--red-dark);      border-color: var(--red);      box-shadow: inset 0 0 0 1px var(--red); }
+.strand-btn-lf.is-on { color: var(--blue-dark);     border-color: var(--blue);     box-shadow: inset 0 0 0 1px var(--blue); }
+.strand-btn-bn.is-on { color: var(--charcoal-dark); border-color: var(--charcoal); box-shadow: inset 0 0 0 1px var(--charcoal); }
+.strand-btn-nn.is-on { color: #6f7377;              border-color: #9a9da1;         box-shadow: inset 0 0 0 1px #9a9da1; }
+
+.strand-btn .swatch {
+  display: inline-block; width: .58em; height: .58em; border-radius: 50%;
+}
+.strand-btn-hf .swatch { background: var(--red); }
+.strand-btn-lf .swatch { background: var(--blue); }
+.strand-btn-bn .swatch { background: var(--charcoal); }
+.strand-btn-nn .swatch { background: #9a9da1; }
+
+.pub-filters {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: .5rem 1rem; margin-bottom: 2rem;
+}
+.year-jump { display: flex; flex-wrap: wrap; gap: .5rem; }
+/* Its own line under the years, both flush left: at this width the two do
+   not fit on one row, and a right-aligned second row read as a mistake. */
+.strand-filter {
+  display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+  flex-basis: 100%;
+}
+.strand-count {
+  margin-left: auto; text-align: right;
+  font-family: var(--font-display); font-weight: 600;
+  font-size: .78rem; color: var(--muted); margin: .25rem .2rem 0; min-height: 1em;
+}
+
+@media (max-width: 720px) {
+  [data-rail-top] { display: block; }
+  .strand-filter { margin-top: .8rem; }
+  .strand-count { text-align: left; }
+}
+
+.null-note {
+  position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%);
+  z-index: 200; display: flex; align-items: center; gap: .9rem;
+  font-family: var(--font-display); font-weight: 600; font-size: .86rem;
+  color: #fff; background: var(--charcoal-dark);
+  padding: .7rem 1.1rem; border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+}
+.null-restore {
+  font: inherit; color: var(--bg); background: none;
+  border: 1px solid rgba(255,255,255,.5); border-radius: 999px;
+  padding: .2em .8em; cursor: pointer;
+}
+.null-restore:hover { background: rgba(255,255,255,.15); }
+/* A visible settling, so it is obvious something happened. */
+.pub-list.is-shuffled > .pub { animation: nullSettle .5s ease both; }
+@keyframes nullSettle {
+  from { opacity: .25; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   The two header switches.
+   ============================================================ */
+.toggles { display: flex; gap: .4rem; align-items: center; margin-left: auto; }
+
+.toggle {
+  display: grid; place-items: center;
+  height: 34px; min-width: 34px; padding: 0 .5rem;
+  background: none; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px;
+  color: var(--charcoal);
+  transition: color .18s, border-color .18s, background-color .18s;
+}
+.toggle:hover { color: var(--ink); border-color: var(--charcoal); }
+.toggle:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* The icon carries a sun and a moon; which one shows depends on the theme,
+   so the button always pictures what you would get by pressing it. */
+.toggle-icon .t-moon { display: none; }
+:root[data-theme="dark"] .toggle-icon .t-sun,
+:root[data-theme="dark"] .toggle-icon .t-rays { display: none; }
+:root[data-theme="dark"] .toggle-icon .t-moon { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toggle-icon .t-sun,
+  :root:not([data-theme="light"]) .toggle-icon .t-rays { display: none; }
+  :root:not([data-theme="light"]) .toggle-icon .t-moon { display: block; }
+  :root[data-theme="light"] .toggle-icon .t-sun,
+  :root[data-theme="light"] .toggle-icon .t-rays { display: block; }
+  :root[data-theme="light"] .toggle-icon .t-moon { display: none; }
+}
+
+.toggle-field-label {
+  display: flex; align-items: flex-end; gap: .18rem; height: 17px;
+}
+/* Both glyphs are the full height of the logo — the l in "half" has an
+   ascender to match the h — so neither is scaled down against the other. */
+.tf-glyph { display: block; width: auto; height: 100%; transition: opacity .18s; }
+.tf-glyph.tf-l { opacity: .3; }
+:root[data-field="low"] .tf-glyph.tf-h { opacity: .3; }
+:root[data-field="low"] .tf-glyph.tf-l { opacity: 1; }
+:root[data-field="low"] .toggle-field { border-color: var(--blue); }
+
+/* ---- the low-field rendering ------------------------------
+   Applied to imagery only, never to text: the point is what
+   happens to a scan at 64 mT, and unreadable prose is just
+   broken. The amounts are variables so that ?field=<T> can set
+   them precisely, while the switch uses these defaults. */
+/* Low field is not a soft-focus lens — it is fewer voxels and more noise.
+   The images are genuinely resampled down and back up through a canvas, in
+   script; what CSS contributes is the desaturation, the loss of contrast,
+   and the grain over the rest of the page. */
+:root {
+  --field-sat: 1;
+  --field-contrast: 1;
+  --field-grain: 0;
+}
+:root[data-field="low"] {
+  --field-sat: .3;
+  --field-contrast: .78;
+  --field-grain: .5;
+}
+:root[data-field] img,
+:root[data-field] .scan-img,
+:root[data-field] .venn-logo {
+  filter: saturate(var(--field-sat)) contrast(var(--field-contrast));
+  image-rendering: pixelated;
+}
+
+/* The page itself is resampled, not just the pictures: #main and the footer
+   run through the SVG filter above, so headings, the year bar and the body
+   text all go blocky. The header is left alone — the switch that turns this
+   off has to stay legible, and filtering a sticky element breaks the sticky.
+
+   Text is smaller than the tiles, so it degrades further than the images do;
+   that is the honest direction, but it is why the tile is only 3px. */
+:root[data-field="low"] .page-main,
+:root[data-field="low"] .site-footer,
+/* The mark in the corner too — it is the first thing anyone looks at, and
+   leaving it crisp made the effect look like a rendering fault rather than
+   a choice. Filtering the link, not the header, keeps the header sticky. */
+:root[data-field="low"] .brand {
+  filter: url(#lofi);
+}
+
+/* Grain over the top of it, one fixed sheet. */
+.field-grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 90;
+  opacity: 0; transition: opacity .3s;
+  mix-blend-mode: multiply;
+  background-repeat: repeat;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>\
+<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/>\
+<feColorMatrix type='saturate' values='0'/></filter>\
+<rect width='120' height='120' filter='url(%23n)' opacity='0.55'/></svg>");
+}
+:root[data-field="low"] .field-grain { opacity: .22; }
+
+@media (prefers-reduced-motion: reduce) {
+  .field-grain { transition: none; }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .field-grain { mix-blend-mode: screen; }
+}
+:root[data-theme="dark"] .field-grain { mix-blend-mode: screen; }
+.field-note-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
+  background: var(--charcoal-dark); color: #fff;
+  padding: .6rem 24px; text-align: center;
+  font-family: var(--font-display); font-weight: 600; font-size: .82rem;
+}
+.field-note-bar a { color: #9fd0ec; border: 0; }
+
+/* ============================================================
+   Large displays.
+
+   Every size on the page is a clamp with a cap, and on a 2560px
+   monitor all of them sit at that cap: the column was 48% of the
+   screen with 660px of margin either side, and the hero — which
+   still fills the window's height — had a small block of type
+   floating in the middle of it. Rather than let the layout keep
+   growing indefinitely, the caps step up twice and stop.
+   ============================================================ */
+@media (min-width: 1600px) {
+  :root { --wrap: 1480px; }
+
+  .hero h1 { font-size: clamp(2.85rem, 3.4vw, 3.9rem); }
+  .hero-lead { font-size: 1.3rem; }
+  .hero-fields { font-size: 1.12rem; }
+  .hero-meta { font-size: .94rem; }
+  .hero-logo-col { width: 150px; }
+  .hero-logo-band { width: 186px; }
+  .scan-compare { max-width: 580px; }
+  .btn { font-size: 1.05rem; padding: .74em 1.55em; }
+
+  h2 { font-size: clamp(1.85rem, 2.1vw, 2.25rem); }
+  h3 { font-size: 1.26rem; }
+  body { font-size: 18px; }
+}
+
+@media (min-width: 2000px) {
+  :root { --wrap: 1680px; }
+
+  .hero h1 { font-size: clamp(3.9rem, 3.1vw, 4.7rem); }
+  .hero-lead { font-size: 1.42rem; }
+  .hero-fields { font-size: 1.22rem; }
+  .hero-logo-col { width: 172px; }
+  .hero-logo-band { width: 212px; }
+  .scan-compare { max-width: 660px; }
+
+  h2 { font-size: clamp(2.25rem, 2.2vw, 2.5rem); }
+  body { font-size: 19px; }
+}
+
+/* ---------- Super-resolution lens (low-field easter egg) ---
+   The ring is drawn outside the filtered elements, so it stays sharp while
+   everything under it does not — which is the point: the instrument is not
+   part of the image it is looking at. */
+.sr-lens {
+  position: fixed; left: 0; top: 0; z-index: 90;
+  pointer-events: none;
+  /* Positioned by transform rather than left/top: the browser can move a
+     composited layer without laying the page out again, which matters when
+     this follows the pointer. */
+  will-change: transform;
+}
+/* The aperture: a rounded square, because that is the shape a
+   super-resolution model works on, and because straight sides give the four
+   architectures somewhere to sit. */
+.sr-lens .sr-ring {
+  fill: none; stroke: url(#sr-rim); stroke-width: 2.5;
+  opacity: .9;
+}
+/* The convolution above the aperture: a feature map, one kernel on it, and
+   the cell that kernel writes. */
+.sr-lens .sr-cell   { fill: var(--muted); opacity: .5; }
+.sr-lens .sr-kernel { fill: none; stroke: var(--red); stroke-width: 2; }
+/* The state-space block below it: gated inputs, states, and the scan. */
+.sr-lens .sr-state  { fill: none; stroke: var(--blue); stroke-width: 2; }
+.sr-lens .sr-gate   { fill: var(--red); }
+.sr-lens .sr-scan   { fill: none; stroke: var(--charcoal); stroke-width: 1.4; opacity: .45; }
+/* Layers run red to blue outwards — the same two ends of the field-strength
+   scale the rest of the site is built on. */
+.sr-lens .sr-l0 { fill: var(--red); }
+.sr-lens .sr-l1 { fill: var(--charcoal); }
+.sr-lens .sr-l2 { fill: var(--blue); }
+.sr-lens .sr-node { opacity: .92; }
+.sr-lens .sr-mesh,
+.sr-lens .sr-lat {
+  fill: none; stroke: var(--charcoal); stroke-width: 1;
+}
+.sr-lens .sr-mesh { opacity: .32; }
+/* The stubs joining the aperture to the first column of each network. */
+.sr-lens .sr-lat  { opacity: .5; }
+.sr-lens .sr-handle {
+  stroke: url(#sr-rim); stroke-width: 9; stroke-linecap: round; opacity: .85;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* A slow pulse through the connections, as if something were passing along
+     them. The nodes stay put: a lens that jitters is hard to aim. */
+  .sr-lens .sr-mesh { animation: sr-breathe 3.6s ease-in-out infinite; }
+}
+@keyframes sr-breathe {
+  0%, 100% { opacity: .16; }
+  50%      { opacity: .42; }
+}
+
+.sr-note {
+  position: fixed; left: 50%; bottom: 1.1rem; transform: translateX(-50%);
+  z-index: 95; max-width: min(38rem, calc(100% - 2rem));
+  background: var(--bg); color: var(--body);
+  border: 1px solid var(--line); border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+  padding: .55rem 1.1rem; font-size: .88rem; text-align: center;
+}
+.sr-note .sr-stop {
+  font: inherit; font-weight: 600; cursor: pointer;
+  background: none; border: 0; padding: 0 0 0 .35rem;
+  color: var(--blue-dark); text-decoration: underline;
+}
+@media (max-width: 560px) {
+  .sr-note { font-size: .8rem; border-radius: 14px; }
+}

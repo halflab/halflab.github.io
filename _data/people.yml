@@ -1,0 +1,259 @@
+# ============================================================
+#  TEAM MEMBERS
+#
+#  Everyone is shown identically, in the order listed below.
+#  Clicking a photo or name opens that person's bio.
+#
+#  To add someone: copy a block, change the values.
+#  To remove someone: delete their block, or move them to the
+#  `alumni` list at the bottom.
+#
+#  Fields — only `name` and `role` are required:
+#    name    : full name
+#    name_native : the same name in its original script, shown after the
+#              Latin one in a lighter weight (e.g. 宋昕慧). Optional.
+#    role    : job title
+#    photo   : filename in assets/img/team/  (e.g. levente.jpg)
+#              square photos work best, ~600x600px
+#    bio     : the person's own words, as they wrote them — any length,
+#              and any number of paragraphs. Leave as "[TO DO - Short Bio]"
+#              until they send one.
+#    email   : plain address, no "mailto:"
+#    scholar : full Google Scholar profile URL
+#    orcid   : just the ID, e.g. 0000-0002-1234-5678
+#    github  : just the username
+#    bluesky : full handle, e.g. name.bsky.social
+#    website : full URL
+# ============================================================
+
+people:
+
+  - name: František Váša
+    role: Group Lead
+    photo: frantisek.jpg
+    bio: |-
+      I am a Senior Lecturer (Associate Professor) in Machine Learning and
+      Computational Neuroscience in the Department of Neuroimaging at King's
+      College London. I am excited about the potential of portable low-field MRI
+      to widen access to neuroimaging, particularly when paired with AI methods
+      that allow low-field scanners to “punch above their weight”. I also retain
+      an interest in brain network analysis, the area that first drew me to
+      neuroimaging.
+
+      I studied mathematical physics at the University of Edinburgh, followed by
+      biomedical engineering at Imperial College London. I then worked as a
+      research assistant at Lausanne University Hospital with Patric Hagmann. My
+      PhD, supervised by Ed Bullmore at the University of Cambridge, focused on
+      correlation-derived brain networks. I went on to work on MRI pre-processing
+      with Rob Leech and super-resolution with Rosalyn Moran, as a research
+      associate at King's — before taking up a faculty position and starting the
+      half lab.
+
+      Outside of work, I enjoy board sports, indie comics and doughnuts.
+    email: frantisek.vasa@kcl.ac.uk
+    scholar: https://scholar.google.com/citations?user=wnLacTkAAAAJ&hl=en
+    orcid: 0000-0001-6744-7139
+    github: frantisekvasa
+    bluesky: # frantisekvasa.bsky.social
+    website: # https://...
+
+  - name: Levente Baljer
+    role: Postdoctoral Research Associate
+    photo: levente.jpg
+    bio: >-
+      Levi is a PhD candidate (soon to be post-doc) specialising in the use of
+      various deep learning techniques for the enhancement of ultra-low-field
+      imaging. By training image translation models to produce synthetic high-field
+      scans, his work aims to increase the viability of ultra-low-field scanners for
+      use in downstream clinical and research tasks. His work is supervised by Dr.
+      František Váša and Dr. Emma Robinson.
+    email:
+    scholar:
+    orcid:
+    github:
+    bluesky:
+    website:
+
+  - name: Anita Song
+    name_native: 宋昕慧
+    role: PhD Student
+    photo: anita.jpg
+    bio: >-
+      I grew up in Shanghai, China before moving to sunny UK for further education.
+      I completed an integrated master’s in Natural Sciences at the University of
+      York (home of internet celebrity Longboi 🦆) and went on to pursue a PhD at the
+      London Interdisciplinary Doctoral Programme (LIDo). My doctoral research uses
+      data-driven methods to study individual differences in brain-behaviour
+      associations during development, jointly supervised by Prof Emily Jones and Dr
+      Rianne Haartsen at the Centre for Brain and Cognitive Development (Birkbeck,
+      University of London), as well as yours truly (František). My current work
+      investigates trajectories of change in cognitive and neural oscillatory
+      profiles, while using a multiverse approach to identify optimal brain metrics
+      for predicting neurodevelopment. I focus on two complementary and scalable
+      methods for assessing brain development, EEG and ultra-low-field MRI, across
+      different levels of analytical complexity. This work is informed by
+      transdiagnostic and dimensional accounts of neurodevelopmental conditions, as
+      well as the neurodiversity-affirmative framework. I have a particular interest
+      in diversity in developmental science, specifically in diversifying research
+      samples as well as academic inclusivity. See here for more information:
+      [https://sites.google.com/view/diversityindevsci](https://sites.google.com/view/diversityindevsci).
+      When I am not doing neuroscience, you can find me sleeping, discovering new
+      restaurants, or playing volleyball with my friends.
+    email:
+
+  - name: Hajer Karoui
+    role: PhD Student & Research Assistant
+    photo: hajer.jpg
+    bio: |-
+      Hajer is a Research Assistant supporting the development, enhancement and
+      distribution of analysis pipelines for projects across the UNITY network.
+
+      Her doctoral research, funded by the Gates Foundation, focuses on the
+      feasibility and application of MRI-derived structural brain networks in early
+      childhood development across low- and middle-income countries. Working within
+      the UNITY network, she investigates whether structural similarity networks can
+      be reliably constructed from ultra-low-field (64 mT) MRI scanners, which are
+      portable, affordable, and increasingly deployed in resource-limited settings.
+      Her work bridges network neuroscience, paediatric neuroimaging, and global
+      health, with the ultimate goal of making brain development research accessible
+      and inclusive.
+    email:
+
+  - name: Annika Robiolio
+    role: PhD Student
+    photo: annika.jpg
+    bio: |-
+      I am a PhD Student at Institute of Psychiatry, Psychology & Neuroscience at
+      King's College London, working between the Psychological Medicine and
+      Neuroimaging Departments. I joined King's College London and the lab in 2025
+      for my PhD project “Ultra-low-field Neuroimaging In The Elderly-UNITE”. The
+      project involves the assessment of the ultra-low-field MRI acceptability and
+      its potential in detecting dementia biomarkers such as brain volumetric
+      changes and vascular abnormalities. This will be achieved by collecting
+      conventional MRI scans and ultra-low-field MRI scans and developing pipelines
+      with imaging analysis tools and deep learning implementation to improve
+      ultra-low-field scan quality. My background is in Neuroscience (BSc) and
+      Translational Neuroscience (MSc), and I moved to the UK in 2020 for my studies
+      from Italy.
+    email:
+
+  - name: Ula Briski
+    role: PhD Student
+    photo: ula.jpg
+    bio: |-
+      Hi! My name is Ula and I am a PhD student in the half lab, supervised by
+      František Váša and Emma Robinson. I am broadly interested in deep learning for
+      brain MRI and how modern computer vision methods can be implemented on
+      real-world neuroimaging data. My PhD focuses on building a foundation model
+      for ultra-low-field MRI, with the aim of producing a model that can be adapted
+      to a range of downstream tasks across large and diverse datasets.
+
+      Before starting my PhD, I completed a BSc in Neuroscience and Psychology at
+      King's College London, where my work centred on paediatric ultra-low-field
+      imaging, specifically, super-resolution of infant scans acquired without
+      paired high-field data. I then moved to Imperial College London for an MRes in
+      Neurotechnology, where my thesis extended this line of work to generating
+      synthetic data for training super-resolution models. The MRes also introduced
+      me to neuromodulation and BCIs, an area I remain very excited about.
+
+      Outside the lab, you can find me cycling, sailing, skiing, or hiking - or
+      attempting some other outdoor activity :)
+    email:
+
+  - name: Poppy Ulett
+    role: Research Radiographer
+    photo: poppy.jpg
+    bio: |-
+      Poppy is a Diagnostic Radiographer at King’s College Hospital NHS Foundation
+      Trust and was recently awarded an NIHR Maudsley Biomedical Research Centre
+      Translational Clinical Research Training Fellowship, in collaboration with
+      King’s College London Institute of Psychiatry, Psychology and Neuroscience,
+      which she began in April 2026. Her fellowship supports development across
+      clinical practice and research with a focus on neuroscience and biomedical
+      imaging. She currently contributes to the AI-powered Portable MRI Abnormality
+      Detection (APPMAD) study, exploring the potential of portable, low-field MRI
+      and artificial intelligence to support the detection of neurological
+      abnormalities.
+
+      In 2025, Poppy was awarded an NIHR INSIGHT Southwest Peninsula MSc
+      Studentship, enabling her to undertake an MSc in Health Research Methods at
+      the University of Exeter. Throughout her undergraduate degree, Poppy undertook
+      several research roles exploring patient lived experiences, health
+      inequalities and the improvement of clinical education and training. She also
+      supports the delivery of the national NIHR School for Public Health Research
+      Public Involvement and Engagement Strategy at the University of Exeter,
+      contributing to the integration of patient and public perspectives within
+      health research.
+
+      Her contributions to research, leadership and advocacy were recognised through
+      the 2024 Society and College of Radiographers Learner of the Year (Southwest)
+      award. Her research has been presented at national study days and conferences,
+      including the United Kingdom Imaging and Oncology Congress and NIHR
+      conferences, where she received the 2024 Forder Memorial Prize for Best
+      Student Proffered Paper Oral Presentation.
+
+      In her free time, Poppy enjoys playing touch rugby, travelling and getting
+      outdoors.
+    email:
+
+
+# ============================================================
+#  ALUMNI — people who have left the lab.
+#  `role` should include the dates; `now` is where they went.
+# ============================================================
+alumni:
+
+  - name: Isuru Wijesinghe
+    role: Postdoctoral Research Associate
+    now: # e.g. Lecturer at Example University
+    website: # https://...
+
+
+# ============================================================
+#  COLLABORATORS — people we work with elsewhere.
+#  `where` is written out in full: a visitor should not have to
+#  decode an acronym. Order is alphabetical by surname.
+# ============================================================
+collaborators:
+
+  - name: Clara Belessiotis-Richards
+    where: King's College London
+
+  - name: Thomas Booth
+    where: King's College London / King's College Hospital NHS Foundation Trust
+
+  - name: Muriel Bruchhage
+    where: University of Stavanger
+
+  - name: James Cole
+    where: University College London
+
+  - name: Kirsty Donald
+    where: University of Cape Town
+
+  - name: Rianne Haartsen
+    where: Birkbeck, University of London
+
+  - name: Zahra Hoodbhoy
+    where: Aga Khan University
+
+  - name: Emily Jones
+    where: Birkbeck, University of London / King's College London
+
+  - name: Robert Leech
+    where: King's College London
+
+  - name: Charlotte Pretzsch
+    where: King's College London
+
+  - name: Emma Robinson
+    where: King's College London
+
+  - name: Joanne Rodda
+    where: Kent and Medway Medical School
+
+  - name: Ashwin Venkataraman
+    where: King's College London / South London and Maudsley NHS Foundation Trust
+
+  - name: Steven Williams
+    where: King's College London

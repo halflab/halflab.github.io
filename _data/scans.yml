@@ -1,0 +1,41 @@
+# ============================================================
+#  SCAN COMPARISON SLIDER  (home page)
+#
+#  Images are sprite sheets: every axial slice tiled into one
+#  file, so moving through slices costs no extra requests.
+#
+#  Regenerate the sheets — and the `sprite:` block below —
+#  with:
+#
+#    python3 tools/make_scan_images.py \
+#      --high FV_resources/scans/sub-HYPE17_ses-GE_acq-MPRAGE_T1w.nii.gz \
+#      --low  FV_resources/scans/sub-HYPE17_ses-HFC_acq-iso_T1w.nii.gz
+#
+#  That script rigidly co-registers the low-field volume to the
+#  high-field one, trims to the slices both cover, crops to the
+#  head, and writes matched tiles.
+#
+#  Do not edit the `sprite:` block by hand — it gets rewritten.
+# ============================================================
+
+# Single line under the figure. HTML is allowed.
+caption: >-
+  Paired T1w scans from
+  <a href="https://openneuro.org/datasets/ds006557">ds006557</a>:
+  1&nbsp;mm<sup>3</sup> at 3&nbsp;T, 2.3&nbsp;mm<sup>3</sup> at 0.064&nbsp;T
+
+# Rewritten by tools/make_scan_images.py — do not edit by hand.
+sprite:
+  slices: 19
+  cols: 5
+  rows: 4
+  size: 300
+
+# `over` is revealed at the top left; `under` sits beneath, at the bottom right.
+over:
+  image: /assets/img/scans/highfield_slices.jpg
+  label: "3 T"
+
+under:
+  image: /assets/img/scans/lowfield_slices.jpg
+  label: "0.064 T"

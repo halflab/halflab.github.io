@@ -1,0 +1,11 @@
+{% comment %}
+  Renders the lab address without putting it in the page source, so the
+  simplest address harvesters do not pick it up. The parts are split on the
+  "@" and reassembled by the script in _layouts/default.html.
+
+  Without JavaScript the visitor sees a pointer to the institutional page
+  instead of a broken link.
+{% endcomment %}
+<span class="email-obf" data-email-parts="{{ include.address | default: site.email | split: '@' | join: '|' }}">
+  <span class="email-fallback">address on the <a href="{{ site.institution_url }}">{{ site.institution }}</a> staff pages</span>
+</span>

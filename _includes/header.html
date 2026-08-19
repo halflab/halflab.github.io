@@ -1,0 +1,31 @@
+<div class="gradient-bar" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+
+    <a class="brand" href="{{ '/' | relative_url }}" aria-label="{{ site.title }} — home">
+      {% include logo.html file='halflab_horiz_logo' alt=site.title width='150' height='40' %}
+    </a>
+
+    {% include toggles.html %}
+
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="site-nav" aria-label="Main navigation">
+      {% for item in site.nav %}
+        {% assign target = item.url | relative_url %}
+        {% assign is_home = false %}
+        {% if item.url == "/" %}{% assign is_home = true %}{% endif %}
+        {% assign active = false %}
+        {% if is_home and page.url == "/" %}{% assign active = true %}{% endif %}
+        {% unless is_home %}
+          {% if page.url contains item.url %}{% assign active = true %}{% endif %}
+        {% endunless %}
+        <a href="{{ target }}"{% if active %} class="active" aria-current="page"{% endif %}>{{ item.title }}</a>
+      {% endfor %}
+    </nav>
+
+  </div>
+</header>

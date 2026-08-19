@@ -1,0 +1,28 @@
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+vendor/
+Gemfile.lock
+.DS_Store
+
+# offline preview (regenerate any time; not part of the published site)
+preview/
+
+# your Scholar export (regenerate any time; keeps the repo tidy)
+tools/scholar.bib
+
+preview_single.html
+
+# personal working files, not part of the site
+FV_resources/
+
+preview_logo_options.html
+preview_phone.html
+
+# Crossref lookup cache and the backup enrich_from_crossref.py writes
+tools/.crossref-cache.json
+_data/publications.yml.bak
+
+# local snapshots taken before big changes
+backups/

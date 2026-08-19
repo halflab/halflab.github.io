@@ -1,0 +1,193 @@
+{% comment %}
+  Diagonal before/after scan comparison, with a slice selector.
+
+  Both modalities are sprite sheets — every axial slice in one image — so
+  changing slice is a background-position shift rather than a new request.
+
+  The wipe boundary runs perpendicular to the top-left/bottom-right diagonal:
+  at position t the revealed region is {x + y < 2t}, whose midpoint is always
+  (t, t). High field is revealed at the top left, low field sits beneath at
+  the bottom right.
+
+  Both controls are native range inputs, so arrow keys work.
+  Geometry and images come from _data/scans.yml.
+{% endcomment %}
+
+{% assign s = site.data.scans %}
+{% assign sp = s.sprite %}
+{% comment %}
+  Exact middle of the stack. The generator drops a slice from the superior
+  end so that this lands on the ventricles.
+{% endcomment %}
+{% assign mid = sp.slices | minus: 1 | divided_by: 2 %}
+
+<figure class="scan-compare" data-scan-compare
+        data-cols="{{ sp.cols }}" data-rows="{{ sp.rows }}"
+        data-slices="{{ sp.slices }}">
+
+  <div class="scan-body">
+   <div class="scan-frame" data-frame>
+    <div class="scan-stage">
+      <div class="scan-img scan-under" data-under
+           style="background-image:url('{{ s.under.image | relative_url }}')"
+           role="img" aria-label="{{ s.under.label }} scan"></div>
+
+      <div class="scan-img scan-over" data-over
+           style="background-image:url('{{ s.over.image | relative_url }}')"
+           role="img" aria-label="{{ s.over.label }} scan"></div>
+
+      <div class="scan-divider" data-divider aria-hidden="true">
+        <span class="scan-grip"></span>
+      </div>
+
+      <span class="scan-label scan-label-tl">{{ s.over.label }}</span>
+      <span class="scan-label scan-label-br">{{ s.under.label }}</span>
+
+      <label class="scan-sr-only" for="scan-wipe">Comparison position</label>
+      <input class="scan-range" id="scan-wipe" type="range"
+             min="0" max="100" value="50" step="1" data-wipe>
+    </div>
+   </div>
+
+    <div class="scan-slice">
+      <label class="scan-sr-only" for="scan-slice">Axial slice</label>
+      <input class="scan-slice-range" id="scan-slice" type="range"
+             min="0" max="{{ sp.slices | minus: 1 }}" value="{{ mid }}" step="1"
+             data-slice orient="vertical">
+    </div>
+  </div>
+
+  <figcaption>{{ s.caption }}</figcaption>
+</figure>
+
+<script>
+(function () {
+  document.querySelectorAll('[data-scan-compare]').forEach(function (root) {
+    var cols   = +root.dataset.cols,
+        rows   = +root.dataset.rows,
+        n      = +root.dataset.slices,
+        wipe   = root.querySelector('[data-wipe]'),
+        slice  = root.querySelector('[data-slice]'),
+        divider= root.querySelector('[data-divider]'),
+        frame  = root.querySelector('[data-frame]'),
+        over   = root.querySelector('[data-over]'),
+        under  = root.querySelector('[data-under]');
+
+    /* Sprite sheets are cols x rows tiles. Scale the background so one tile
+       fills the stage, then step through tiles with background-position. */
+    [over, under].forEach(function (el) {
+      el.style.backgroundSize = (cols * 100) + '% ' + (rows * 100) + '%';
+    });
+
+    function setSlice(i) {
+      i = Math.max(0, Math.min(n - 1, i));
+      var c = i % cols, r = Math.floor(i / cols);
+      var x = cols > 1 ? (c / (cols - 1)) * 100 : 0;
+      var y = rows > 1 ? (r / (rows - 1)) * 100 : 0;
+      var pos = x + '% ' + y + '%';
+      over.style.backgroundPosition = pos;
+      under.style.backgroundPosition = pos;
+    }
+
+    /* The line takes the colour of whichever scan currently dominates:
+       blue when the low-field image fills the frame (handle at the top
+       left), red when the high-field image does (bottom right), passing
+       through the logo grey at the halfway point. */
+    var BLUE = [30, 115, 166], GREY = [77, 77, 77], RED = [207, 72, 50];
+
+    function mix(a, b, f) {
+      return 'rgb(' + a.map(function (c, i) {
+        return Math.round(c + (b[i] - c) * f);
+      }).join(',') + ')';
+    }
+
+    /* Ease the colour so it commits sooner once off-centre: at a quarter of
+       the way from the middle the line is already most of the way to its
+       end colour, rather than drifting linearly. */
+    function ease(f) { return Math.min(1, Math.pow(f, 0.55) * 1.35); }
+
+    function lineColour(t) {
+      return t <= 0.5 ? mix(GREY, BLUE, ease(1 - t * 2))
+                      : mix(GREY, RED,  ease((t - 0.5) * 2));
+    }
+
+    /* Fraction of the frame showing the high-field image. The revealed
+       region is the triangle/pentagon {x + y < 2t} of the unit square. */
+    function highFrac(t) {
+      return t <= 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+    }
+
+    function setWipe(v) {
+      var t = v / 100, p;
+      if (t <= 0.5) {
+        p = '0% 0%, ' + (200 * t) + '% 0%, 0% ' + (200 * t) + '%';
+      } else {
+        var e = 200 * t - 100;
+        p = '0% 0%, 100% 0%, 100% ' + e + '%, ' + e + '% 100%, 0% 100%';
+      }
+      over.style.clipPath = 'polygon(' + p + ')';
+      divider.style.left = (t * 100) + '%';
+      divider.style.top  = (t * 100) + '%';
+      divider.style.background = lineColour(t);
+
+      /* The frame shifts with the wipe: the charcoal midpoint slides so that
+         more of the border is red as the high-field image takes over, and
+         more is blue as the low-field one does. */
+      frame.style.background =
+        'linear-gradient(135deg, var(--red) 0%, var(--charcoal) '
+        + (t * 100).toFixed(1) + '%, var(--blue) 100%)';
+
+      /* Each label grows with the share of the frame its scan occupies. */
+      var hi = highFrac(t);
+      var tl = root.querySelector('.scan-label-tl');
+      var br = root.querySelector('.scan-label-br');
+      if (tl) tl.style.fontSize = (0.80 + 0.66 * hi).toFixed(3) + 'rem';
+      if (br) br.style.fontSize = (0.80 + 0.66 * (1 - hi)).toFixed(3) + 'rem';
+    }
+
+    wipe.addEventListener('input', function () { setWipe(+wipe.value); });
+
+    /* On a desktop, clicking anywhere on a range input jumps the thumb to
+       that spot — that is what makes tapping the image work there. iOS
+       Safari does not: a range only responds to a drag of the thumb itself,
+       so tapping the scan did nothing.
+
+       So on touch we read the position off the image directly. The boundary
+       is the line x + y = 2t across the unit square, which inverts to
+       t = (x + y) / 2 — the same diagonal the wipe already draws, so a tap
+       lands the line exactly where the finger is. */
+    var coarse = window.matchMedia && window.matchMedia('(hover: none)').matches;
+    if (coarse) {
+      var stage = root.querySelector('.scan-stage');
+      var dragging = false;
+
+      function wipeToPoint(ev) {
+        var r = stage.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        var u = (ev.clientX - r.left) / r.width;
+        var v = (ev.clientY - r.top) / r.height;
+        var t = Math.max(0, Math.min(1, (u + v) / 2));
+        wipe.value = Math.round(t * 100);
+        setWipe(+wipe.value);
+      }
+
+      wipe.addEventListener('pointerdown', function (ev) {
+        dragging = true;
+        wipeToPoint(ev);
+      });
+      wipe.addEventListener('pointermove', function (ev) {
+        if (dragging) wipeToPoint(ev);
+      });
+      /* pointercancel matters here: the stage allows vertical panning, so a
+         downward drag is handed to the scroller mid-gesture and the wipe
+         must stop following it. */
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (e) {
+        wipe.addEventListener(e, function () { dragging = false; });
+      });
+    }
+    slice.addEventListener('input', function () { setSlice(+slice.value); });
+    setWipe(+wipe.value);
+    setSlice(+slice.value);
+  });
+})();
+</script>

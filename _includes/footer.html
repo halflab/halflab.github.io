@@ -1,0 +1,21 @@
+{% comment %}
+  Deliberately minimal: the institutional mark on the left, three lines on
+  the right. Nothing else.
+{% endcomment %}
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+
+    {% if site.institution_url %}
+      <a class="footer-mark" href="{{ site.institution_url }}" aria-label="{{ site.institution }}">
+        <img src="{{ '/assets/img/kcl-logo.png' | relative_url }}" alt="{{ site.institution }}" loading="lazy" decoding="async">
+      </a>
+    {% endif %}
+
+    <div class="footer-lines">
+      <p class="footer-name">{{ site.tagline }}</p>
+      <p>{{ site.department_short }}</p>
+      <p>{% include email.html %}</p>
+    </div>
+
+  </div>
+</footer>

@@ -1,0 +1,40 @@
+---
+layout: page
+title: Resources
+permalink: /resources/
+---
+
+{% for cat in site.data.resources.categories %}
+  {% assign items = site.data.resources.resources | where: "category", cat.key %}
+  {% if items.size > 0 %}
+
+    <section style="margin-bottom:2.8rem">
+      <h2 style="margin-top:0">{{ cat.title }}</h2>
+      {% if cat.intro %}<p>{{ cat.intro }}</p>{% endif %}
+
+      <div style="margin-top:1.2rem">
+        {% for r in items %}
+          <div class="resource">
+            <div>
+              <h3>
+                {% if r.url %}<a href="{{ r.url }}">{{ r.name }}</a>{% else %}{{ r.name }}{% endif %}
+              </h3>
+              <p>{{ r.description }}</p>
+              {% if r.links %}
+                <div class="pub-tags">
+                  {% for l in r.links %}<a class="tag code" href="{{ l.url }}">{{ l.label }}</a>{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  {% endif %}
+{% endfor %}
+
+<div class="callout blue">
+  <h3>Open science</h3>
+  {{ site.data.resources.open_science | markdownify }}
+</div>

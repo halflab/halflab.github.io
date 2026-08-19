@@ -1,0 +1,214 @@
+---
+layout: default
+title: Home
+---
+
+<section class="hero">
+  <div class="wrap">
+
+  {% comment %}
+    The one-line logo in the header now carries the full lab name on every
+    page, so the hero no longer repeats it. Set `hero_logo` in _config.yml
+    to "band" or "column" to bring the stacked logo back here if wanted.
+  {% endcomment %}
+  {% if site.hero_logo == "band" %}
+    <img class="hero-logo-band" src="{{ '/assets/img/halflab_full_logo.png' | relative_url }}"
+         alt="half lab" loading="lazy" decoding="async">
+  {% endif %}
+
+  <div class="hero-grid">
+
+    <div class="hero-text">
+      <p class="hero-meta">{{ site.institution }}</p>
+      <h1>
+        <span class="accent-red">High</span> and <span class="accent-blue">Low</span> Field
+        <span class="h1-sub">Network Neuroimaging</span>
+      </h1>
+      <p class="hero-fields">
+        <span class="hf-low">&lt;&thinsp;0.1&nbsp;T</span>
+        <span class="hf-arrow" aria-hidden="true"></span>
+        <span class="hf-high">&ge;&thinsp;1.5&nbsp;T</span>
+      </p>
+      <p class="hero-lead">
+        We develop AI and analysis methods across MRI field strengths — from
+        portable low-field scanners below 0.1 T, which can widen access to
+        imaging, to conventional systems at 1.5–3 T.
+      </p>
+      <div class="hero-actions">
+        <a class="btn" href="{{ '/research/' | relative_url }}">Our research</a>
+        <a class="btn" href="{{ '/team/' | relative_url }}">Meet the team</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      {% if site.hero_logo == "column" %}
+        <img class="hero-logo-col" src="{{ '/assets/img/halflab_full_logo.png' | relative_url }}"
+             alt="half lab" loading="lazy" decoding="async">
+      {% endif %}
+      {% include scan_slider.html %}
+    </div>
+
+  </div>
+  </div>
+</section>
+
+
+<!-- ============ Research themes summary ============ -->
+<section class="section section-tint">
+  <div class="wrap">
+
+    <div class="section-head wide">
+      <h2>Our work</h2>
+      <p>
+        Low-field brain MRI scanners are far cheaper than conventional systems
+        and can be moved to the patient, but they yield much lower signal and
+        resolution.
+        Much of our work is about closing that gap with neural networks, and
+        validating to what extent measures — from regional volumes to brain
+        networks — agree across field strengths.
+      </p>
+    </div>
+
+    <div class="grid grid-2">
+      {% for a in site.data.research.approaches limit: 3 %}
+        <article class="card">
+          <div class="card-icon">{% include icon.html name=a.icon %}</div>
+          <h3>{{ a.title }}</h3>
+          <p>{{ a.short }}</p>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% comment %}
+      A plain link rather than a second button — the hero already offers
+      "Our research" as a button, and two identical calls to action a
+      screen apart read as a repeat.
+    {% endcomment %}
+    <div class="section-foot">
+      <a class="more-link" href="{{ '/research/' | relative_url }}">More about our research →</a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============ News + selected publications ============ -->
+<section class="section">
+  <div class="wrap grid grid-2" style="align-items: start; gap: 3rem;">
+
+    <div>
+      <div class="section-head" style="margin-bottom:1.2rem">
+        <h2 class="rule-blue" style="margin-top:0">News</h2>
+      </div>
+
+      {% assign recent = site.news | sort: 'date' | reverse %}
+      {% if recent.size > 0 %}
+        <ul class="news-compact">
+          {% for item in recent limit: 4 %}
+            <li>
+              <span class="d">{{ item.date | date: "%-d %b %Y" }}</span>
+              <a href="{{ item.url | relative_url }}">{{ item.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+        <p style="margin-top:1.4rem"><a href="{{ '/news/' | relative_url }}">All news →</a></p>
+      {% else %}
+        <p class="muted">No news posted yet.</p>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="section-head" style="margin-bottom:1.2rem">
+        <h2 class="rule-charcoal" style="margin-top:0">Selected publications</h2>
+      </div>
+
+      {% comment %}
+        Driven by the `selected:` field in _data/publications.yml — set it to
+        1, 2, 3 ... on the papers you want here, in that order.
+      {% endcomment %}
+      {% assign chosen = site.data.publications.publications | sort: 'selected' %}
+      <ul class="pub-list">
+        {% for pub in chosen %}
+          {% if pub.selected %}
+            <li class="pub pub-compact">
+              {% if pub.url %}
+                <a class="pub-title" href="{{ pub.url }}">{{ pub.title }}</a>
+              {% else %}
+                <span class="pub-title">{{ pub.title }}</span>
+              {% endif %}
+              <p class="pub-venue" style="margin:0">{{ pub.venue }}{% if pub.year %} · {{ pub.year }}{% endif %}</p>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+      <p style="margin-top:1.4rem"><a href="{{ '/publications/' | relative_url }}">All publications →</a></p>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  /* The field-strength axis is sized to the second line of the title, so its
+     end labels line up with that line's ends rather than the column edges.
+     Re-measured on resize and once the webfont has loaded, since the title's
+     width changes when Quicksand swaps in. */
+  (function () {
+    var sub = document.querySelector('.hero h1 .h1-sub');
+    var axis = document.querySelector('.hero-fields');
+    if (!sub || !axis) return;
+
+    /* The span is display:block, so its own box is the full column width.
+       Measure the text itself with a Range instead. */
+    var lead = document.querySelector('.hero-lead');
+
+    /* The lead paragraph wants the same width, so the hero reads as one
+       column with three aligned edges. But it must not spill onto a fourth
+       line: at the title's width the sentence is a little too long. So take
+       the title's width as the target and widen from there in small steps
+       until it fits in three lines — usually only a few, and the result is
+       within a few percent of the title either way. */
+    var MAX_LINES = 3;
+
+    function lineCount() {
+      var lh = parseFloat(window.getComputedStyle(lead).lineHeight);
+      if (!lh) return 99;
+      return Math.round(lead.getBoundingClientRect().height / lh);
+    }
+
+    function fitLead(target) {
+      if (!lead) return;
+      lead.style.fontSize = '';        /* start from the stylesheet's clamp */
+      var base = parseFloat(window.getComputedStyle(lead).fontSize);
+      var cap = lead.parentNode.getBoundingClientRect().width;
+
+      for (var w = target; w <= cap; w += 8) {
+        lead.style.maxWidth = Math.round(w) + 'px';
+        if (lineCount() <= MAX_LINES) return;
+      }
+
+      /* Even the full column is not enough — which happens once the hero's
+         middle gap takes width off this side. Rather than let the sentence
+         spill onto a fourth line, take a little off the type. The limit is
+         6%, small enough not to read as a different size, and if that still
+         is not enough the sentence itself is too long and wants editing. */
+      lead.style.maxWidth = Math.round(cap) + 'px';
+      for (var f = base; f >= base * 0.94; f -= 0.4) {
+        lead.style.fontSize = f.toFixed(2) + 'px';
+        if (lineCount() <= MAX_LINES) return;
+      }
+    }
+
+    var range = document.createRange();
+    function fit() {
+      range.selectNodeContents(sub);
+      var w = range.getBoundingClientRect().width;
+      if (w > 0) {
+        axis.style.width = Math.round(w) + 'px';
+        fitLead(w);
+      }
+    }
+    fit();
+    window.addEventListener('resize', fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  })();
+</script>

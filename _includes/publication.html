@@ -1,0 +1,79 @@
+{% comment %}
+  One publication entry. The title itself is the link to the publisher —
+  there is no separate DOI badge. Expects: include publication.html pub=pub
+{% endcomment %}
+
+{% comment %}
+  data-cite carries a plain-text reference for the copy button. Markdown
+  emphasis is stripped so the clipboard gets clean text.
+{% endcomment %}
+{% capture cite %}{{ include.pub.authors | replace: '**', '' | replace: '\*', '*' }} ({{ include.pub.year }}). {{ include.pub.title }}. {{ include.pub.venue }}{% if include.pub.details %}, {{ include.pub.details }}{% endif %}.{% if include.pub.url %} {{ include.pub.url }}{% endif %}{% endcapture %}
+
+<li class="pub"
+    data-tags="{{ include.pub.tags | join: ' ' }}"
+    data-authors="{{ include.pub.authors_full | default: include.pub.authors | replace: '**', '' | replace: '\*', '' | escape }}"
+    data-year="{{ include.pub.year }}"
+    data-find="{{ include.pub.title | append: ' ' | append: include.pub.authors_full | append: ' ' | append: include.pub.venue | append: ' ' | append: include.pub.year | replace: '**', '' | downcase | escape }}"{% if site.interactive.copy_citation %} data-cite="{{ cite | strip | escape }}"{% endif %}>
+
+  {% comment %}
+    Titles link to the publisher via their DOI. Anything still lacking a
+    `url:` falls back to Crossref — the official DOI registry — rather than
+    Google Scholar. Run tools/bib_to_yml.py --crossref to fill these in
+    properly; the fallback then disappears on its own.
+  {% endcomment %}
+  {% if include.pub.url %}
+    <a class="pub-title" href="{{ include.pub.url }}">{{ include.pub.title }}</a>
+  {% else %}
+    {% assign q = include.pub.title | url_encode %}
+    <a class="pub-title is-search"
+       href="https://search.crossref.org/search/works?q={{ q }}&from_ui=yes"
+       title="No DOI recorded yet — looks this title up in Crossref">{{ include.pub.title }}</a>
+  {% endif %}
+
+  {% if include.pub.tags and include.pub.tags.size > 0 %}
+    {% comment %}
+      The strands this paper belongs to, in the fixed order hf / lf / nn / bn
+      rather than the order they happen to appear in the data — so the same
+      strand always sits at the same height down the column.
+    {% endcomment %}
+    <div class="pub-strands" role="img"
+         aria-label="Strands: {{ include.pub.tags | join: ', ' }}">
+        {% if include.pub.tags contains 'hf' %}
+          <img class="strand strand-hf" src="{{ '/assets/img/icons/brain-hf.png' | relative_url }}"
+               alt="high field" title="high field" loading="lazy" decoding="async">
+        {% endif %}
+        {% if include.pub.tags contains 'lf' %}
+          <img class="strand strand-lf" src="{{ '/assets/img/icons/brain-lf.png' | relative_url }}"
+               alt="low field" title="low field" loading="lazy" decoding="async">
+        {% endif %}
+        {% if include.pub.tags contains 'nn' %}
+          <img class="strand strand-nn" src="{{ '/assets/img/icons/neural-network.png' | relative_url }}"
+               alt="neural networks" title="neural networks" loading="lazy" decoding="async">
+        {% endif %}
+        {% if include.pub.tags contains 'bn' %}
+          <img class="strand strand-bn" src="{{ '/assets/img/icons/brain-network.png' | relative_url }}"
+               alt="brain networks" title="brain networks" loading="lazy" decoding="async">
+        {% endif %}
+    </div>
+  {% endif %}
+  {% if include.pub.authors %}
+    <p class="pub-authors">{{ include.pub.authors | markdownify | remove: '<p>' | remove: '</p>' | strip }}</p>
+  {% endif %}
+
+  {% if include.pub.venue or include.pub.details %}
+    <p class="pub-venue">
+      {{ include.pub.venue }}{% if include.pub.details %}, {{ include.pub.details }}{% endif %}
+    </p>
+  {% endif %}
+
+  {% if include.pub.note %}
+    <p class="pub-note">{{ include.pub.note | markdownify | remove: '<p>' | remove: '</p>' | strip }}</p>
+  {% endif %}
+
+  {% comment %}
+    No badges: the title links to the paper, and code and data are listed
+    on the Resources page rather than repeated against every entry. The
+    fields still exist in _data/publications.yml if you want them back.
+  {% endcomment %}
+
+</li>

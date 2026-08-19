@@ -1,0 +1,262 @@
+---
+layout: page
+title: Team
+permalink: /team/
+---
+
+<div class="people">
+  {% for p in site.data.people.people %}
+    {% assign pid = forloop.index %}
+    <div class="person">
+
+      <button class="person-trigger" type="button" data-person="{{ pid }}"
+              aria-haspopup="dialog" aria-label="More about {{ p.name }}">
+        {% if p.photo %}
+          <img class="person-photo" src="{{ '/assets/img/team/' | append: p.photo | relative_url }}" alt="{{ p.name }}" loading="lazy" decoding="async">
+        {% else %}
+          {% assign parts = p.name | split: " " %}
+          {% assign initials = "" %}
+          {% for part in parts limit: 2 %}{% assign letter = part | slice: 0 %}{% assign initials = initials | append: letter %}{% endfor %}
+          <span class="person-photo placeholder" aria-hidden="true">{{ initials | upcase }}</span>
+        {% endif %}
+        {% comment %}
+          A name in its original script sits on the same line as the Latin
+          one: putting it on a line of its own would push that card's role
+          down while every other role in the row stayed put.
+        {% endcomment %}
+        <span class="person-name">{{ p.name }}{% if p.name_native %} <span class="name-native" lang="zh">{{ p.name_native }}</span>{% endif %}</span>
+      </button>
+
+      <p class="role">{{ p.role }}</p>
+
+    </div>
+  {% endfor %}
+</div>
+
+
+{% comment %} One dialog per person, opened by the buttons above {% endcomment %}
+{% for p in site.data.people.people %}
+  {% assign pid = forloop.index %}
+  <dialog class="person-dialog" id="person-{{ pid }}" aria-labelledby="person-{{ pid }}-name">
+    <form method="dialog">
+      <button class="dialog-close" aria-label="Close">&times;</button>
+    </form>
+
+    <div class="dialog-body">
+      {% if p.photo %}
+        <img class="dialog-photo" src="{{ '/assets/img/team/' | append: p.photo | relative_url }}" alt="{{ p.name }}" loading="lazy" decoding="async">
+      {% else %}
+        {% assign parts = p.name | split: " " %}
+        {% assign initials = "" %}
+        {% for part in parts limit: 2 %}{% assign letter = part | slice: 0 %}{% assign initials = initials | append: letter %}{% endfor %}
+        <span class="dialog-photo placeholder" aria-hidden="true">{{ initials | upcase }}</span>
+      {% endif %}
+
+      <div class="dialog-text">
+        <h2 id="person-{{ pid }}-name">{{ p.name }}{% if p.name_native %} <span class="name-native" lang="zh">{{ p.name_native }}</span>{% endif %}</h2>
+        <p class="role">{{ p.role }}</p>
+        {% comment %}
+          Bios are people's own words, pasted in as they wrote them, so they
+          vary: first person or third, one paragraph or several, and one has
+          a link in it. markdownify handles the paragraph breaks and that
+          link; a bio with neither still comes out as a single <p>.
+        {% endcomment %}
+        {% if p.bio %}<div class="bio">{{ p.bio | markdownify }}</div>{% endif %}
+
+        <div class="person-links">
+          {% comment %}
+            href is filled in by the script in _layouts/default.html, so the
+            address is not in the served HTML.
+          {% endcomment %}
+          {% if p.email %}<a href="{{ site.institution_url }}"
+             data-email-parts="{{ p.email | split: '@' | join: '|' }}">Email</a>{% endif %}
+          {% if p.website %}<a href="{{ p.website }}">Website</a>{% endif %}
+          {% if p.scholar %}<a href="{{ p.scholar }}">Scholar</a>{% endif %}
+          {% if p.orcid %}<a href="https://orcid.org/{{ p.orcid }}">ORCID</a>{% endif %}
+          {% if p.github %}<a href="https://github.com/{{ p.github }}">GitHub</a>{% endif %}
+          {% if p.bluesky %}<a href="https://bsky.app/profile/{{ p.bluesky }}">Bluesky</a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </dialog>
+{% endfor %}
+
+
+{% if site.data.people.alumni and site.data.people.alumni.size > 0 %}
+  <section class="alumni">
+    <h2>Alumni</h2>
+    <ul class="alumni-list">
+      {% for a in site.data.people.alumni %}
+        <li>
+          <span class="alumni-name">{% if a.website %}<a href="{{ a.website }}">{{ a.name }}</a>{% else %}{{ a.name }}{% endif %}</span>
+          <span class="alumni-role">{{ a.role }}{% if a.now %} · now {{ a.now }}{% endif %}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+
+
+{% if site.data.people.collaborators and site.data.people.collaborators.size > 0 %}
+  <section class="alumni collaborators">
+    <h2>Collaborators</h2>
+    <ul class="collab-list">
+      {% for c in site.data.people.collaborators %}
+        <li>
+          <span class="alumni-name">{% if c.website %}<a href="{{ c.website }}">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}</span>
+          <span class="alumni-role">{{ c.where }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+
+
+{% if site.data.gallery.photos and site.data.gallery.photos.size > 0 %}
+  <section class="gallery-section">
+    <div class="section-head"><h2 class="rule-blue">Lab life</h2></div>
+
+    <div class="gallery-wrap">
+    <button class="gallery-nav prev" type="button" data-scroll="-1" aria-label="Previous photos">
+      <span aria-hidden="true">‹</span>
+    </button>
+
+    <div class="gallery" data-gallery>
+      {% for photo in site.data.gallery.photos %}
+        {% comment %}
+          Photos without a caption used to leave the button with no
+          accessible name at all — a screen reader announced twelve
+          identical "button"s. Fall back to the date.
+        {% endcomment %}
+        <button class="gallery-item" type="button"
+                data-full="{{ photo.full | relative_url }}"
+                data-caption="{{ photo.caption }}"
+                data-date="{{ photo.date | date: '%B %Y' }}"
+                aria-label="{% if photo.caption %}{{ photo.caption }} — {% endif %}lab photo, {{ photo.date | date: '%B %Y' }}. Opens larger">
+          {% comment %}
+            The strip is 4:3, so a portrait photo shows only its middle band
+            and a face near the top gets cut off. `focus` in
+            _data/gallery.yml moves that band up.
+          {% endcomment %}
+          <img src="{{ photo.thumb | relative_url }}" loading="lazy" decoding="async"
+               alt="{{ photo.caption | default: 'half lab' }}"
+               {% if photo.focus %}style="object-position: center {{ photo.focus }}"{% endif %}>
+          {% if photo.caption %}<span class="gallery-cap">{{ photo.caption }}</span>{% endif %}
+        </button>
+      {% endfor %}
+    </div>
+
+    <button class="gallery-nav next" type="button" data-scroll="1" aria-label="More photos">
+      <span aria-hidden="true">›</span>
+    </button>
+    </div>
+  </section>
+
+  <dialog class="lightbox" data-lightbox>
+    <button class="lightbox-close" data-lb-close aria-label="Close">&times;</button>
+    <img data-lb-img alt="" loading="lazy" decoding="async">
+    <p class="lightbox-cap" data-lb-cap></p>
+  </dialog>
+{% endif %}
+
+
+<section class="join">
+  {% include logo.html file='halflab_horiz_logo' class='closing-logo' alt='half lab' %}
+  <h2>Interested in joining us?</h2>
+  <p class="join-line">We welcome enquiries from prospective PhD students, postdocs and collaborators.</p>
+  <p class="join-contact">{% include email.html %}</p>
+</section>
+
+<script>
+  /* Fit each role on one line, shrinking only the ones that need it. */
+  (function () {
+    var roles = [].slice.call(document.querySelectorAll('.person .role'));
+    if (!roles.length) return;
+
+    function fit() {
+      roles.forEach(function (el) {
+        el.style.fontSize = '';
+        var base = parseFloat(window.getComputedStyle(el).fontSize);
+        var size = base, floor = base * 0.7;
+        while (el.scrollWidth > el.clientWidth + 0.5 && size > floor) {
+          size -= 0.5;
+          el.style.fontSize = size.toFixed(1) + 'px';
+        }
+      });
+    }
+
+    fit();
+    window.addEventListener('resize', fit);
+    /* Quicksand changes the measurement when it swaps in. */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  })();
+
+  (function () {
+    var lb = document.querySelector('[data-lightbox]');
+    if (!lb) return;
+    var img = lb.querySelector('[data-lb-img]');
+    var cap = lb.querySelector('[data-lb-cap]');
+    document.querySelectorAll('.gallery-item').forEach(function (b) {
+      b.addEventListener('click', function () {
+        img.src = b.dataset.full;
+        img.alt = b.dataset.caption || 'half lab';
+        cap.textContent = [b.dataset.caption, b.dataset.date]
+          .filter(Boolean).join(' · ');
+        if (lb.showModal) lb.showModal();
+      });
+    });
+    lb.querySelector('[data-lb-close]').addEventListener('click', function () { lb.close(); });
+    lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
+  })();
+
+  /* Arrow buttons scroll the strip by roughly one screenful, and disable
+     themselves at each end. */
+  (function () {
+    var strip = document.querySelector('[data-gallery]');
+    if (!strip) return;
+    var btns = document.querySelectorAll('[data-scroll]');
+
+    function refresh() {
+      /* While the strip is hidden it measures zero, which would wrongly
+         disable both arrows and never recover. Leave them alone until it
+         has a real width. */
+      if (!strip.clientWidth) return;
+      var max = strip.scrollWidth - strip.clientWidth - 2;
+      btns.forEach(function (b) {
+        var back = b.dataset.scroll === '-1';
+        b.disabled = back ? strip.scrollLeft <= 2 : strip.scrollLeft >= max;
+      });
+    }
+
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var step = strip.clientWidth * 0.8;
+        strip.scrollBy({ left: +b.dataset.scroll * step, behavior: 'smooth' });
+      });
+    });
+
+    strip.addEventListener('scroll', refresh);
+    window.addEventListener('resize', refresh);
+    /* Fires when the strip first gains a size, e.g. once its section is
+       shown, so the arrows enable themselves at the right moment. */
+    if (window.ResizeObserver) new ResizeObserver(refresh).observe(strip);
+    refresh();
+  })();
+</script>
+
+<script>
+  (function () {
+    document.querySelectorAll('.person-trigger').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var d = document.getElementById('person-' + btn.dataset.person);
+        if (!d) return;
+        if (typeof d.showModal === 'function') { d.showModal(); }
+        else { d.setAttribute('open', ''); }   /* fallback for old browsers */
+      });
+    });
+    /* click on the backdrop closes the dialog */
+    document.querySelectorAll('.person-dialog').forEach(function (d) {
+      d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+    });
+  })();
+</script>

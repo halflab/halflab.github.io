@@ -1,0 +1,103 @@
+---
+layout: page
+title: Publications
+permalink: /publications/
+---
+
+{% comment %}
+  Years run newest first. Only the list of years is sorted — the entries
+  themselves keep the order they have in _data/publications.yml, so anything
+  you arrange by hand within a year stays put. (Sorting the entries and
+  reversing would flip the within-year order too.)
+{% endcomment %}
+{% assign pubs = site.data.publications.publications %}
+{% assign years = pubs | map: "year" | uniq | sort | reverse %}
+
+{% if site.interactive.highlights and site.data.highlights.highlights %}
+  <section class="highlights">
+    <div class="section-head"><h2>Highlights</h2></div>
+
+    <div class="highlight-row">
+      {% for h in site.data.highlights.highlights %}
+        <a class="highlight" href="{{ h.url }}">
+          <img src="{{ h.figure | relative_url }}" alt="{{ h.alt }}" loading="lazy">
+          {% if h.title %}<p class="highlight-title">{{ h.title }}</p>{% endif %}
+          <p class="highlight-take">{{ h.takeaway }}</p>
+          <p class="highlight-ref">{{ h.paper }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% if site.google_scholar %}
+  <p style="margin-bottom:2rem">
+    A complete and continuously updated list is available on
+    <a href="{{ site.google_scholar }}">Google Scholar</a>.
+  </p>
+{% endif %}
+
+{% comment %}
+  data-rail-top marks where the year bar's block begins. The script inserts
+  its spacer before this heading, not before the bar itself, so the two stay
+  together at the foot of the first screen.
+{% endcomment %}
+<div class="section-head" data-rail-top>
+  <h2 class="rule-blue">Full list</h2>
+</div>
+
+{% comment %}
+  Jump by year on the left, narrow by strand on the right, in one sticky row.
+  The script finds the sticky container by .pub-filters and the chips by
+  .pub-year-jump, so the nesting here is free to change.
+{% endcomment %}
+<div class="pub-filters">
+  <nav class="year-jump" aria-label="Jump to year">
+    {% for y in years %}
+      {% if y %}<a class="pub-year-jump" href="#y{{ y }}">{{ y }}</a>{% endif %}
+    {% endfor %}
+  </nav>
+
+  {% if site.interactive.pub_filter %}
+    <div class="strand-filter" role="group" aria-label="Filter by strand">
+      <button class="strand-btn strand-btn-hf" type="button" data-strand="hf"
+              aria-pressed="false"><span class="swatch" aria-hidden="true"></span>high-field</button>
+      <button class="strand-btn strand-btn-lf" type="button" data-strand="lf"
+              aria-pressed="false"><span class="swatch" aria-hidden="true"></span>low-field</button>
+      <button class="strand-btn strand-btn-nn" type="button" data-strand="nn"
+              aria-pressed="false"><span class="swatch" aria-hidden="true"></span>neural networks</button>
+      <button class="strand-btn strand-btn-bn" type="button" data-strand="bn"
+              aria-pressed="false"><span class="swatch" aria-hidden="true"></span>brain networks</button>
+      <p class="strand-count" aria-live="polite"></p>
+    </div>
+  {% endif %}
+</div>
+
+{% comment %}
+  Entries with no year are collected at the end rather than creating a
+  blank heading.
+{% endcomment %}
+{% assign undated = 0 %}
+{% for pub in pubs %}{% unless pub.year %}{% assign undated = undated | plus: 1 %}{% endunless %}{% endfor %}
+
+{% for y in years %}
+ {% if y %}
+  <h2 class="pub-year" id="y{{ y }}">{{ y }}</h2>
+
+  <ul class="pub-list">
+    {% assign year_pubs = pubs | where: "year", y %}
+    {% for pub in year_pubs %}
+      {% include publication.html pub=pub %}
+    {% endfor %}
+  </ul>
+ {% endif %}
+{% endfor %}
+
+{% if undated > 0 %}
+  <h2 class="pub-year" id="y-undated">Undated</h2>
+  <ul class="pub-list">
+    {% for pub in pubs %}
+      {% unless pub.year %}{% include publication.html pub=pub %}{% endunless %}
+    {% endfor %}
+  </ul>
+{% endif %}

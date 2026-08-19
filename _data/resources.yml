@@ -1,0 +1,74 @@
+# ============================================================
+#  RESOURCES — data, software and teaching material.
+#  Categories appear in the order listed below; within a
+#  category, entries appear in the order they are written.
+#
+#  Fields:
+#    name        : tool or dataset name
+#    mark        : 1–3 characters shown in the coloured square
+#    description : one or two sentences
+#    category    : data | software | teaching
+#    url         : main link
+#    links       : optional extra links (label + url)
+# ============================================================
+
+categories:
+  - key: data
+    title: Data
+    intro:
+  - key: software
+    title: Software & code
+    intro:
+  - key: teaching
+    title: Teaching & tutorials
+    intro: Course material, workshop notebooks and explainers.
+
+resources:
+
+  # ---------------- Data ----------------
+  - name: Ultra-low-field brain MRI test-retest dataset
+    mark: ds
+    category: data
+    description: >-
+      Defaced T1- and T2-weighted structural scans from 23 healthy adults
+      (aged 20–69), imaged on two identical 64 mT systems and a 3 T system,
+      across a range of orientations and resolutions. Released on OpenNeuro
+      as ds006557.
+    url: https://openneuro.org/datasets/ds006557
+    links:
+      - label: Paper
+        url: https://doi.org/10.1162/IMAG.a.930
+
+  # ---------------- Software ----------------
+  - name: half lab on GitHub
+    mark: hl
+    category: software
+    description: >-
+      Shared repositories for lab projects — code released with our papers,
+      and tools we maintain.
+    url: https://github.com/halflab
+
+  - name: František Váša on GitHub
+    mark: FV
+    category: software
+    description: >-
+      Personal account: analysis pipelines, figure code accompanying published
+      papers, and standalone tools — including null models for network
+      neuroscience.
+    url: https://github.com/frantisekvasa
+
+
+# ============================================================
+#  OPEN SCIENCE — the statement at the foot of the page.
+# ============================================================
+open_science: >-
+  **We post preprints.** Papers go to bioRxiv, medRxiv or arXiv when they are
+  submitted.
+
+
+  **We share code.** Analysis pipelines and the code behind published figures
+  go on GitHub.
+
+
+  **We release data.** Datasets are published openly once the study they
+  belong to allows it.

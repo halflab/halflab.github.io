@@ -1,0 +1,68 @@
+{% comment %}
+  Structured data, so that search engines and reference managers can read the
+  site as data rather than guessing from the layout.
+
+  Every page describes the lab itself. The publications page additionally
+  lists all 42 papers as ScholarlyArticle, built from the same _data file the
+  visible list comes from — there is no second copy to keep in step.
+
+  `authors_full` is used where present: the visible list is abbreviated to fit
+  one line, but machines should get everyone.
+{% endcomment %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ResearchOrganization",
+  "name": {{ site.title | jsonify }},
+  "alternateName": {{ site.tagline | jsonify }},
+  "url": {{ site.url | append: site.baseurl | jsonify }},
+  "logo": {{ '/assets/img/halflab_full_logo.png' | absolute_url | jsonify }},
+  "description": {{ site.description | strip_newlines | jsonify }},
+  "parentOrganization": {
+    "@type": "CollegeOrUniversity",
+    "name": {{ site.institution | jsonify }},
+    "url": {{ site.institution_url | jsonify }}
+  },
+  "member": [
+    {%- for p in site.data.people.people -%}
+    {
+      "@type": "Person",
+      "name": {{ p.name | jsonify }}{% if p.role %},
+      "jobTitle": {{ p.role | jsonify }}{% endif %}
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+{% if page.url contains "/publications" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Publications",
+  "itemListElement": [
+    {%- for pub in site.data.publications.publications -%}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.index }},
+      "item": {
+        "@type": "ScholarlyArticle",
+        "name": {{ pub.title | jsonify }},
+        {% assign who = pub.authors_full | default: pub.authors -%}
+        "author": {{ who | replace: '**', '' | replace: '\*', '' | jsonify }},
+        {% if pub.year %}"datePublished": {{ pub.year | jsonify }},{% endif %}
+        {% if pub.venue %}"publication": {{ pub.venue | jsonify }},{% endif %}
+        {% if pub.url %}"url": {{ pub.url | jsonify }},{% endif %}
+        "isPartOf": {
+          "@type": "PublicationIssue",
+          "name": {{ pub.venue | default: "" | jsonify }}
+        }
+      }
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+</script>
+{% endif %}

@@ -1,0 +1,987 @@
+{% comment %}
+  Optional interactive behaviours, each guarded by a flag in _config.yml
+  under `interactive:`. Turning a flag off removes its script entirely.
+
+  Everything here is progressive enhancement: with JavaScript off the pages
+  still read and navigate normally.
+{% endcomment %}
+
+<script>
+(function () {
+  var reduce = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+{% if site.interactive.nav_underline %}
+  /* ---- nav underline follows the cursor ------------------------------ */
+  (function () {
+    var nav = document.querySelector('.site-nav');
+    if (!nav || nav.querySelector('.nav-slider')) return;
+    var bar = document.createElement('span');
+    bar.className = 'nav-slider';
+    nav.appendChild(bar);
+
+    /* Looked up on each rest rather than cached: the bar must return to the
+       tab that is current at that moment, not the one that was current when
+       the script first ran. */
+    function currentTab() { return nav.querySelector('a.active'); }
+
+    function moveTo(el) {
+      if (!el) { bar.style.opacity = 0; return; }
+      var n = nav.getBoundingClientRect(), r = el.getBoundingClientRect();
+      bar.style.width = (r.width - 24) + 'px';
+      bar.style.transform = 'translateX(' + (r.left - n.left + 12) + 'px)';
+      bar.style.opacity = 1;
+    }
+    function rest() { moveTo(currentTab()); }
+
+    nav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('mouseenter', function () { moveTo(a); });
+    });
+    nav.addEventListener('mouseleave', rest);
+    rest();
+    window.addEventListener('resize', rest);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(rest);
+  })();
+{% endif %}
+
+{% if site.interactive.venn_filter %}
+  /* ---- Venn regions light up the circles they belong to --------------- */
+  (function () {
+    var svg = document.querySelector('.venn svg');
+    if (!svg) return;
+    var parts = [].slice.call(svg.querySelectorAll('.venn-part'));
+    var surface = svg.querySelector('.venn-surface');
+    var stageOK = svg.querySelector('.venn-defs') && svg.querySelector('.venn-fills');
+    if (!parts.length || !surface || !stageOK) return;
+
+    /* Read the geometry off the markup so the two can't drift apart. */
+    var circles = parts.map(function (g) {
+      return {
+        el: g,
+        cx: parseFloat(g.dataset.cx),
+        cy: parseFloat(g.dataset.cy),
+        r:  parseFloat(g.dataset.r)
+      };
+    });
+
+    /* The overview prose is keyed to the same four circles. A span names the
+       set of circles its sentence belongs to, and lights only when the cursor
+       is in exactly that region — so a sentence about high and low field
+       together stays dark while you hover either circle alone.
+
+       Keys are normalised into a canonical order here so that the wording in
+       _data/research.yml can list them however reads best, and the CSS still
+       has one stable attribute to hang colours on. */
+    var ORDER = ['hf', 'lf', 'nn', 'bn'];
+
+    function normalise(str) {
+      var named = str.trim().split(/\s+/);
+      return ORDER.filter(function (k) { return named.indexOf(k) > -1; }).join(' ');
+    }
+
+    var spans = [].slice.call(document.querySelectorAll('.overview [data-t]'))
+      .map(function (el) {
+        /* A comma lists alternative regions that share one sentence. */
+        var alts = el.dataset.t.split(',').map(normalise);
+        el.dataset.set = alts[0];          /* what the stylesheet matches on */
+        return { el: el, alts: alts };
+      });
+
+    /* ---- filling the hovered region ---------------------------------
+       A region is "inside these circles, outside those". Both halves are
+       expressed in a single <mask>: start white (everything visible), then
+       paint black. For a circle the region must be OUTSIDE, that is just a
+       black disc. For a circle it must be INSIDE, it is the canvas with a
+       disc punched out of it — one path, fill-rule evenodd.
+
+       A single mask beats chaining <clipPath>s: nothing here is exotic, so
+       it renders the same everywhere. Shapes are built on first hover and
+       kept for reuse. */
+    var SVGNS = 'http://www.w3.org/2000/svg';
+    var COLOUR = { hf: '#cf4832', lf: '#1e73a6', nn: '#9a9da1', bn: '#4d4d4d' };
+    var defs  = svg.querySelector('.venn-defs');
+    var stage = svg.querySelector('.venn-fills');
+    var logo  = document.querySelector('.venn-logo');
+    var W = 520, H = 470;
+    var geom = {};
+    circles.forEach(function (c) { geom[c.el.dataset.venn] = c; });
+
+    function make(name, attrs) {
+      var e = document.createElementNS(SVGNS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    /* The canvas with a circular hole in it. Two half-arcs make the circle;
+       evenodd leaves its interior unpainted. */
+    function outside(c) {
+      return make('path', {
+        'fill-rule': 'evenodd', fill: '#000',
+        d: 'M0 0H' + W + 'V' + H + 'H0Z' +
+           'M' + (c.cx - c.r) + ' ' + c.cy +
+           'a' + c.r + ' ' + c.r + ' 0 1 0 ' + (2 * c.r) + ' 0' +
+           'a' + c.r + ' ' + c.r + ' 0 1 0 ' + (-2 * c.r) + ' 0Z'
+      });
+    }
+
+    function buildFill(region) {
+      var keep = region.split(' ');
+      var id = 'vf-' + keep.join('');
+
+      var mask = make('mask', {
+        id: id + '-m', maskUnits: 'userSpaceOnUse',
+        x: 0, y: 0, width: W, height: H
+      });
+      mask.appendChild(make('rect', { x: 0, y: 0, width: W, height: H, fill: '#fff' }));
+      ORDER.forEach(function (k) {
+        if (keep.indexOf(k) > -1) {
+          mask.appendChild(outside(geom[k]));
+        } else {
+          var c = geom[k];
+          mask.appendChild(make('circle', { cx: c.cx, cy: c.cy, r: c.r, fill: '#000' }));
+        }
+      });
+      defs.appendChild(mask);
+
+      /* The wash runs through the region's colours in the same left-to-right
+         order as the highlight on the prose beside it. */
+      var grad = make('linearGradient', { id: id + '-g', x1: '0', y1: '0', x2: '1', y2: '.35' });
+      keep.forEach(function (k, i) {
+        grad.appendChild(make('stop', {
+          offset: (keep.length < 2 ? 50 : (i / (keep.length - 1)) * 100) + '%',
+          'stop-color': COLOUR[k]
+        }));
+      });
+      defs.appendChild(grad);
+
+      var g = make('g', { 'class': 'venn-fill', mask: 'url(#' + id + '-m)' });
+      g.appendChild(make('rect', {
+        x: 0, y: 0, width: W, height: H, fill: 'url(#' + id + '-g)'
+      }));
+      stage.appendChild(g);
+      return g;
+    }
+
+    var built = {}, showing = null;
+
+    function fill(region) {
+      if (region === showing) return;
+      if (showing && built[showing]) built[showing].classList.remove('is-on');
+      if (region) {
+        if (!built[region]) built[region] = buildFill(region);
+        built[region].classList.add('is-on');
+      }
+      if (logo) logo.classList.toggle('is-lit', region === ORDER.join(' '));
+      showing = region;
+    }
+
+    /* One place decides what a region looks like, whichever side the cursor
+       is on — the diagram and the prose are two views of the same state. */
+    function apply(region) {
+      var keys = region ? region.split(' ') : [];
+      circles.forEach(function (c) {
+        var on = keys.indexOf(c.el.dataset.venn) > -1;
+        c.el.classList.toggle('is-lit', on);
+        c.el.classList.toggle('is-faded', !!region && !on);
+      });
+      fill(region);
+      spans.forEach(function (s) {
+        s.el.classList.toggle('is-lit', !!region && s.alts.indexOf(region) > -1);
+      });
+      active = region || null;
+    }
+
+    function clear() { apply(null); }
+
+    /* Which region is lit. Read by the tap handlers below so that tapping the
+       same region twice turns it off. */
+    var active = null;
+
+    var pt = svg.createSVGPoint();
+
+    function regionAt(ev) {
+      var m = svg.getScreenCTM();
+      if (!m) return null;
+      pt.x = ev.clientX; pt.y = ev.clientY;
+      var p = pt.matrixTransform(m.inverse());
+
+      /* A point can sit inside one, two or all four circles — light every
+         one that contains it, which is exactly what the region means. In the
+         middle, where all four meet, all four light up. */
+      var lit = {};
+      circles.forEach(function (c) {
+        var dx = p.x - c.cx, dy = p.y - c.cy;
+        if (dx * dx + dy * dy <= c.r * c.r) lit[c.el.dataset.venn] = true;
+      });
+      /* The region is named by the full set of circles containing the point,
+         and a sentence lights only on an exact match. */
+      return ORDER.filter(function (k) { return lit[k]; }).join(' ') || null;
+    }
+
+    /* Hover needs a cursor that can rest somewhere without committing to
+       anything. A touchscreen has no such state: the equivalent gesture is a
+       drag, and a drag scrolls the page, which made the diagram effectively
+       unusable on a phone. So pointers hover and fingers tap. */
+    var hoverable = !window.matchMedia
+      || window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    /* Keyboard route, in both input modes: each circle is focusable, and
+       focusing it lights that circle and its sentence. The intersections
+       cannot be reached this way — there is nothing to focus — but the four
+       strands are the substance, and the prose reads in full regardless. */
+    parts.forEach(function (g) {
+      g.addEventListener('focus', function () { apply(g.dataset.venn); });
+      g.addEventListener('blur', clear);
+      g.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          apply(active === g.dataset.venn ? null : g.dataset.venn);
+        }
+      });
+    });
+
+    if (hoverable) {
+      surface.addEventListener('pointermove', function (ev) { apply(regionAt(ev)); });
+      surface.addEventListener('pointerleave', clear);
+      spans.forEach(function (s) {
+        s.el.addEventListener('mouseenter', function () { apply(s.alts[0]); });
+        s.el.addEventListener('mouseleave', clear);
+      });
+    } else {
+      var fig = document.querySelector('.venn');
+      fig.classList.add('is-tappable');
+
+      /* With the diagram pinned at the top, the sentence it refers to may be
+         anywhere in the prose below — including off the bottom of the screen.
+         Bring it into the band between the diagram and the foot of the
+         window, moving as little as possible: if it already fits, do
+         nothing. */
+      function reveal(region) {
+        if (!region) return;
+        var lit = spans.filter(function (s) { return s.alts.indexOf(region) > -1; });
+        if (!lit.length) return;
+
+        var top = Infinity, bottom = -Infinity;
+        lit.forEach(function (s) {
+          var r = s.el.getBoundingClientRect();
+          top = Math.min(top, r.top);
+          bottom = Math.max(bottom, r.bottom);
+        });
+
+        /* Where the diagram comes to rest once pinned, not where it happens
+           to be now — the scroll itself is what pins it. */
+        var pinned = parseFloat(window.getComputedStyle(fig).top);
+        if (isNaN(pinned)) pinned = 0;
+        var bandTop = pinned + fig.offsetHeight + 12;
+        var bandBottom = window.innerHeight - 12;
+
+        var delta = 0;
+        if (bottom > bandBottom) delta = bottom - bandBottom;   /* pull it up */
+        /* Never so far that the start of the sentence goes under the
+           diagram: a sentence taller than the band shows its opening. */
+        if (top - delta < bandTop) delta = top - bandTop;
+        if (Math.abs(delta) < 2) return;
+
+        window.scrollBy({
+          top: delta, left: 0,
+          behavior: reduce ? 'auto' : 'smooth'
+        });
+      }
+
+      /* Tapping the lit region again turns it off, so there is always a way
+         back to the plain diagram without hunting for empty space. */
+      function toggle(region) { apply(region === active ? null : region); }
+
+      surface.addEventListener('click', function (ev) {
+        var region = regionAt(ev);
+        toggle(region);
+        /* Only after a tap on the diagram. Tapping the sentence itself means
+           you are already looking at it. */
+        if (region && region === active) reveal(region);
+      });
+      spans.forEach(function (s) {
+        s.el.addEventListener('click', function (ev) {
+          ev.preventDefault();
+          toggle(s.alts[0]);
+        });
+      });
+      /* A tap anywhere else puts it away. */
+      document.addEventListener('click', function (ev) {
+        if (svg.contains(ev.target)) return;
+        if (ev.target.closest && ev.target.closest('.overview [data-t]')) return;
+        clear();
+      });
+    }
+  })();
+{% endif %}
+
+{% if site.interactive.year_rail %}
+  /* ---- publication year chips track the year you are reading --------- */
+  (function () {
+    var rail = document.querySelector('.pub-filters');
+    if (!rail) return;
+    rail.classList.add('is-rail');
+
+    /* The header is sticky, so the rail has to start exactly at its lower
+       edge. Measuring beats hard-coding: the header's height changes with
+       the logo size and at narrow widths. */
+    var header = document.querySelector('.site-header');
+    var chips = [].slice.call(rail.querySelectorAll('.pub-year-jump'));
+    var heads = [].slice.call(document.querySelectorAll('.pub-year'));
+
+    function place() {
+      if (!header) return;
+      /* Floor, not round: landing a fraction of a pixel high is invisible
+         (the bar's overhang covers it), landing low leaves a gap. */
+      var top = Math.floor(header.getBoundingClientRect().height);
+      rail.style.top = top + 'px';
+
+      /* Clicking a year must leave its heading below both the header and the
+         rail, not tucked underneath them. */
+      var clear = top + Math.ceil(rail.getBoundingClientRect().height) + 14;
+      heads.forEach(function (h) { h.style.scrollMarginTop = clear + 'px'; });
+    }
+    place();
+    window.addEventListener('resize', place);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    /* The header grows and shrinks with the logo image and at narrow widths,
+       and the logo may still be loading when this first runs. */
+    if (window.ResizeObserver && header) new ResizeObserver(place).observe(header);
+    window.addEventListener('load', place);
+
+    if (!chips.length || !heads.length) return;
+
+    /* Colour each chip by where its year sits in the run, so the bar reads as
+       one gradient: newest red, oldest blue, charcoal through the middle —
+       the same three colours as the logo and the scan slider's frame. */
+    (function () {
+      var RED = [207, 72, 50], GREY = [77, 77, 77], BLUE = [30, 115, 166];
+      function mix(a, b, f) {
+        return 'rgb(' + a.map(function (c, i) {
+          return Math.round(c + (b[i] - c) * f);
+        }).join(',') + ')';
+      }
+      chips.forEach(function (c, i) {
+        var t = chips.length > 1 ? i / (chips.length - 1) : 0.5;
+        c.style.setProperty('--chip',
+          t <= 0.5 ? mix(RED, GREY, t * 2) : mix(GREY, BLUE, (t - 0.5) * 2));
+      });
+    })();
+
+    /* Opening the page should show everything above the year bar and nothing
+       below it, so the bar sits on the bottom edge of the first screen.
+
+       The space goes into a spacer element rather than a margin on the bar.
+       A margin here would collapse with the 3rem margin-bottom of the
+       highlights section above it — the gap becomes max(the two), not their
+       sum — so the bar would land short by 48px, which is about the height
+       of a year heading. That is exactly what was still showing.
+
+       Only measurable from the top of the page: once scrolled, a sticky
+       element reports its stuck position, not its place in the document. */
+    var railTop = document.querySelector('[data-rail-top]') || rail;
+    var spacer = document.createElement('div');
+    spacer.className = 'pub-rail-spacer';
+    railTop.parentNode.insertBefore(spacer, railTop);
+
+    var FOOT = 20;      /* air left under the bar, so it isn't on the edge */
+    /* On a tall monitor the highlights fill well under half the window, so
+       parking the bar at the very bottom opened several hundred pixels of
+       nothing. Past this much the gap reads as a fault rather than as
+       breathing room, and the bar being a little higher costs nothing. */
+    var MAX_PUSH = 90;
+
+    function fitFirstScreen() {
+      if (window.pageYOffset > 2) return;
+      spacer.style.height = '0px';
+      var box = rail.getBoundingClientRect();
+      if (!box.height) return;                 /* hidden — nothing to measure */
+      var extra = window.innerHeight - FOOT - box.height - box.top;
+      extra = Math.min(extra, MAX_PUSH);
+      spacer.style.height = extra > 0 ? Math.round(extra) + 'px' : '0px';
+    }
+    fitFirstScreen();
+    window.addEventListener('resize', fitFirstScreen);
+    window.addEventListener('load', fitFirstScreen);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFirstScreen);
+    /* The highlight figures sit above the bar and are lazy-loaded, so they
+       can arrive after `load` and push the bar down again. Re-fit on each
+       one rather than assuming the page has settled. */
+    [].slice.call(document.images).forEach(function (im) {
+      if (!im.complete) im.addEventListener('load', fitFirstScreen);
+    });
+
+    /* Letting the browser handle the jump lands the heading under the bar in
+       some cases even with scroll-margin set, so the chips do the scroll
+       themselves and the arithmetic is visible here. */
+    function clearance() {
+      return (header ? header.getBoundingClientRect().height : 0)
+           + rail.getBoundingClientRect().height + 16;
+    }
+    chips.forEach(function (c) {
+      c.addEventListener('click', function (ev) {
+        var id = c.getAttribute('href').slice(1);
+        var target = document.getElementById(id);
+        if (!target) return;
+        ev.preventDefault();
+        var y = window.pageYOffset + target.getBoundingClientRect().top - clearance();
+        window.scrollTo({ top: Math.max(0, y), behavior: reduce ? 'auto' : 'smooth' });
+        if (history.replaceState) history.replaceState(null, '', '#' + id);
+      });
+    });
+
+    /* Every year with any of its entries on screen is highlighted, not just
+       one: a screen usually spans two or three of them, and lighting a single
+       chip made the bar look wrong at every boundary.
+
+       A year's block runs from its own heading to the next one. The top of
+       the visible band is the underside of the bar, plus enough margin that a
+       heading scrolled to just below it counts as arrived — the chips land a
+       heading at header + rail + 16, so 26 clears that even if the smooth
+       scroll stops a pixel short. */
+    function sync() {
+      /* Measured from the header, not from the bar. The bar's own position
+         swings about — the spacer parks it at the foot of the first screen,
+         and it only settles under the header once you scroll past that — so
+         using it as the reference made the band jump from ~800px to ~130px
+         and the highlight came and went with it. The header is fixed in
+         place, so the band is stable from the first pixel of scroll.
+         26px clears where a clicked heading lands. */
+      var top = (header ? header.getBoundingClientRect().height : 0)
+              + rail.offsetHeight + 26;
+      var band = top;
+      var foot = window.innerHeight;
+      var lit = {};
+
+      heads.forEach(function (h, i) {
+        var start = h.getBoundingClientRect().top;
+        var next = heads[i + 1];
+        var end = next ? next.getBoundingClientRect().top : Infinity;
+        if (start < foot && end > band) lit[h.id] = true;
+      });
+
+      /* Scrolled above the first heading, or past the end of a short list:
+         fall back to whichever heading is nearest the top of the band. */
+      if (!Object.keys(lit).length) {
+        var best = heads[0];
+        heads.forEach(function (h) {
+          if (h.getBoundingClientRect().top <= band) best = h;
+        });
+        lit[best.id] = true;
+      }
+
+      chips.forEach(function (c) {
+        c.classList.toggle('on', !!lit[c.getAttribute('href').slice(1)]);
+      });
+    }
+    /* Coalesce to one measurement per frame: iOS fires scroll events far
+       faster than it paints, and every call here reads layout. */
+    var queued = false;
+    function onScroll() {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(function () { queued = false; sync(); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', sync);
+    window.addEventListener('load', sync);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sync);
+    sync();
+  })();
+{% endif %}
+
+{% if site.interactive.dataset_expand %}
+  /* ---- dataset entries open on click --------------------------------- */
+  (function () {
+    var items = document.querySelectorAll('.dataset[data-expand]');
+    if (!items.length) return;
+    items.forEach(function (d, n) {
+      var head = d.querySelector('.dataset-head');
+      var body = d.querySelector('.dataset-body');
+      if (!head || !body) return;
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'dataset-toggle';
+      btn.setAttribute('aria-expanded', n === 0 ? 'true' : 'false');
+      btn.innerHTML = head.innerHTML;
+      head.innerHTML = '';
+      head.appendChild(btn);
+
+      if (n !== 0) d.classList.add('is-closed');
+      btn.addEventListener('click', function () {
+        var open = d.classList.toggle('is-closed');
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+    });
+  })();
+{% endif %}
+
+{% if site.interactive.pub_filter %}
+  /* ---- filter the list by strand -------------------------------------- */
+  (function () {
+    var btns = [].slice.call(document.querySelectorAll('.strand-btn'));
+    var pubs = [].slice.call(document.querySelectorAll('.pub[data-tags]'));
+    var count = document.querySelector('.strand-count');
+    if (!btns.length || !pubs.length) return;
+
+    var years = [].slice.call(document.querySelectorAll('.pub-year'));
+    var on = {};
+
+    /* An author filter can still arrive by URL — /publications/?q=Baljer.
+       Nothing on the site links to it any more (the team pages used to), but
+       the handling costs nothing and makes such a link shareable. It stacks
+       with the strand buttons. */
+    var who = new URLSearchParams(window.location.search).get('q');
+    var wanted = who ? who.toLowerCase() : null;
+
+    function run() {
+      var picked = Object.keys(on).filter(function (k) { return on[k]; });
+      var shown = 0;
+
+      pubs.forEach(function (p) {
+        var tags = (p.dataset.tags || '').split(' ').filter(Boolean);
+        /* With nothing picked, everything shows — including the handful of
+           papers that belong to no strand. With a strand picked, a paper
+           needs at least one of the chosen ones. */
+        var byStrand = !picked.length || picked.some(function (k) {
+          return tags.indexOf(k) > -1;
+        });
+        var byAuthor = !wanted || (p.dataset.find || '').indexOf(wanted) > -1;
+        var hit = byStrand && byAuthor;
+        p.hidden = !hit;
+        if (hit) shown++;
+      });
+
+      /* Hide a year that has nothing left under it, and its chip with it. */
+      years.forEach(function (h) {
+        var list = h.nextElementSibling;
+        var any = list && list.querySelector('.pub:not([hidden])');
+        h.hidden = !any;
+        if (list) list.hidden = !any;
+        var chip = document.querySelector('.pub-year-jump[href="#' + h.id + '"]');
+        if (chip) chip.hidden = !any;
+      });
+
+      var filtering = picked.length || wanted;
+      if (count) {
+        count.textContent = filtering
+          ? shown + (shown === 1 ? ' paper' : ' papers') +
+            (wanted ? ' by ' + who : '')
+          : '';
+      }
+      document.body.classList.toggle('is-filtering', !!filtering);
+
+      /* The bar stays pinned, so it has to be re-measured: the list just
+         changed height, and the spacer that parks it at the foot of the
+         first screen was sized against the old one. The year-rail block
+         listens for resize. */
+      window.dispatchEvent(new Event('resize'));
+    }
+
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = b.dataset.strand;
+        on[k] = !on[k];
+        b.setAttribute('aria-pressed', on[k] ? 'true' : 'false');
+        b.classList.toggle('is-on', on[k]);
+        run();
+      });
+    });
+
+    if (wanted) run();
+  })();
+{% endif %}
+
+{% if site.interactive.null_easter %}
+  /* ---- type "null" ---------------------------------------------------- */
+  (function () {
+    var lists = [].slice.call(document.querySelectorAll('.pub-list'));
+    if (!lists.length) return;
+    var typed = '', word = 'null', shuffled = false, note;
+
+    function shuffle() {
+      lists.forEach(function (ul) {
+        var items = [].slice.call(ul.children);
+        for (var i = items.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          ul.insertBefore(items[i], items[j]);
+        }
+      });
+      /* Fixed to the foot of the window, not appended to the heading: the
+         heading is usually off screen by the time anyone is reading the list,
+         and an easter egg you cannot see has not gone off. */
+      note = document.createElement('div');
+      note.className = 'null-note';
+      note.innerHTML = 'This is what a null model looks like. ' +
+                       '<button type="button" class="null-restore">Put it back</button>';
+      document.body.appendChild(note);
+      note.querySelector('.null-restore').addEventListener('click', function () {
+        window.location.reload();
+      });
+      document.querySelectorAll('.pub-list').forEach(function (ul) {
+        ul.classList.add('is-shuffled');
+      });
+      shuffled = true;
+    }
+
+    document.addEventListener('keydown', function (ev) {
+      /* Single characters only: Shift, Meta and the arrow keys would
+         otherwise fill the buffer with 'ShiftShiftShift' and the word could
+         never complete. */
+      if (ev.key.length !== 1 || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      if (ev.target.closest && ev.target.closest('input, textarea')) return;
+      if (shuffled) { window.location.reload(); return; }
+      typed = (typed + ev.key).slice(-word.length);
+      if (typed.toLowerCase() === word) shuffle();
+    });
+  })();
+{% endif %}
+
+{% if site.interactive.sr_lens %}
+  /* ---- type "gambas" or "sr" in low-field mode ------------------------
+     A super-resolution model, as a magnifying glass. The patch under the
+     pointer is re-rendered by a gentler chain than the rest of the page —
+     better, not right, which is the honest version of what these models do.
+
+     Only available in low field: there is nothing to recover at 3 T. */
+  (function () {
+    var doc = document.documentElement;
+    var template = document.getElementById('lofi-lens');
+    if (!template) return;
+
+    var WORDS = ['gambas', 'sr', 'iqt'];
+    /* Every match, not the first: the offline preview holds all the pages in
+       one document as several .page-main sections, and lensing only the first
+       of them left the egg working on Home and nowhere else. */
+    var TARGETS = '.page-main, .site-footer, .brand';
+    var SIDE = 150;      /* half the patch: the aperture is 300px square */
+    var HALF = 262;      /* half the whole graphic, blocks and handle */
+    var RX = 46;         /* corner radius — matches what the filter produces */
+    var PAD = 88;        /* 4 sigma of the patch's edge blur, in the filter */
+
+    var typed = '', on = false, lens, note, parts = [], queued = false;
+    var px = window.innerWidth / 2, py = window.innerHeight / 2;
+
+    function lowField() { return doc.getAttribute('data-field') === 'low'; }
+
+    /* ---- the graphic --------------------------------------------------
+       A rounded aperture with a different architecture on each side, all
+       reading outwards from the patch: a convolution above, a state-space
+       chain below, and a fully connected stack either side. Drawn in the
+       flat, node-and-edge style of the icon on the Research page.
+
+       Each side is built in its own local frame — u along the edge, v
+       outwards — and then rotated into place, so one piece of geometry
+       serves all four. */
+    function graphic() {
+      var ns = 'http://www.w3.org/2000/svg';
+      var svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('viewBox', -HALF + ' ' + -HALF + ' ' + (HALF * 2) + ' ' + (HALF * 2));
+      svg.setAttribute('width', HALF * 2);
+      svg.setAttribute('height', HALF * 2);
+      svg.setAttribute('aria-hidden', 'true');
+      svg.setAttribute('focusable', 'false');
+
+      function place(u, v, side) {
+        if (side === 0) return [ u, -v];        /* above  */
+        if (side === 1) return [ v,  u];        /* right  */
+        if (side === 2) return [-u,  v];        /* below  */
+        return [-v, -u];                        /* left   */
+      }
+      function seg(a, b) {
+        return 'M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) +
+               'L' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
+      }
+      function box(cls, p, w, h, r) {
+        return '<rect class="' + cls + '" x="' + (p[0] - w / 2).toFixed(1) +
+               '" y="' + (p[1] - h / 2).toFixed(1) + '" width="' + w +
+               '" height="' + h + '" rx="' + r + '"/>';
+      }
+
+      var mesh = '', stubs = '', shapes = '';
+
+      /* -- fully connected: 5, 4, 3, every node to every node ----------- */
+      function mlp(side) {
+        var LAY = [
+          { n: 5, out: 20, size: 4.6 },
+          { n: 4, out: 52, size: 4.0 },
+          { n: 3, out: 84, size: 3.4 }
+        ];
+        var SPAN = 210;
+        var cols = LAY.map(function (l) {
+          var col = [];
+          for (var i = 0; i < l.n; i++) {
+            col.push((i - (l.n - 1) / 2) * (SPAN / (l.n + 1)));
+          }
+          return col;
+        });
+        var P = cols.map(function (col, L) {
+          return col.map(function (u) { return place(u, SIDE + LAY[L].out, side); });
+        });
+        P[0].forEach(function (node, i) {
+          stubs += seg(place(cols[0][i], SIDE, side), node);
+        });
+        for (var L = 0; L < P.length - 1; L++) {
+          P[L].forEach(function (from) {
+            P[L + 1].forEach(function (to) { mesh += seg(from, to); });
+          });
+        }
+        P.forEach(function (col, L) {
+          col.forEach(function (pt) {
+            shapes += '<circle class="sr-node sr-l' + L + '" cx="' + pt[0].toFixed(1) +
+                      '" cy="' + pt[1].toFixed(1) + '" r="' + LAY[L].size + '"/>';
+          });
+        });
+      }
+
+      /* -- a convolution: a feature map, a kernel on it, and the single
+            cell that kernel writes ------------------------------------- */
+      function conv(side) {
+        var CELL = 13, IN = 5, OUT = 3, base = SIDE + 44;
+        var inU = -62, outU = 72;
+
+        function grid(cu, n) {
+          for (var r = 0; r < n; r++) {
+            for (var c = 0; c < n; c++) {
+              var pt = place(cu + (c - (n - 1) / 2) * CELL,
+                             base + (r - (n - 1) / 2) * CELL, side);
+              shapes += box('sr-cell', pt, CELL * 0.76, CELL * 0.76, 1.5);
+            }
+          }
+        }
+        grid(inU, IN);
+        grid(outU, OUT);
+
+        /* The kernel sits over one corner of the map, and the four lines
+           run from it to the one cell of the output it is responsible for. */
+        var ku = inU - CELL, kv = base - CELL;
+        var c1 = place(ku - CELL * 1.5, kv - CELL * 1.5, side);
+        var c2 = place(ku + CELL * 1.5, kv + CELL * 1.5, side);
+        shapes += '<rect class="sr-kernel" x="' + Math.min(c1[0], c2[0]).toFixed(1) +
+                  '" y="' + Math.min(c1[1], c2[1]).toFixed(1) +
+                  '" width="' + Math.abs(c2[0] - c1[0]).toFixed(1) +
+                  '" height="' + Math.abs(c2[1] - c1[1]).toFixed(1) + '" rx="2"/>';
+
+        var target = place(outU - CELL, base - CELL, side);
+        [-1.5, 1.5].forEach(function (du) {
+          [-1.5, 1.5].forEach(function (dv) {
+            mesh += seg(place(ku + du * CELL, kv + dv * CELL, side), target);
+          });
+        });
+        for (var c = 0; c < IN; c++) {
+          var u = inU + (c - (IN - 1) / 2) * CELL;
+          stubs += seg(place(u, SIDE, side), place(u, base - CELL * 2, side));
+        }
+      }
+
+      /* -- a state-space block: gated inputs, a chain of states, and the
+            scan that runs along them ----------------------------------- */
+      function ssm(side) {
+        var STEP = 52, BOX = 15, base = SIDE + 46, N = 4;
+        var us = [];
+        for (var i = 0; i < N; i++) us.push((i - (N - 1) / 2) * STEP);
+
+        us.forEach(function (u, i) {
+          shapes += box('sr-state', place(u, base, side), BOX, BOX, 3.5);
+          var gate = place(u, SIDE + 20, side);
+          shapes += '<circle class="sr-gate" cx="' + gate[0].toFixed(1) +
+                    '" cy="' + gate[1].toFixed(1) + '" r="4.6"/>';
+          stubs += seg(place(u, SIDE, side), gate);
+          stubs += seg(gate, place(u, base - BOX / 2, side));
+          if (i) {
+            mesh += seg(place(us[i - 1] + BOX / 2, base, side),
+                        place(u - BOX / 2, base, side));
+            /* The recurrence, arcing away from the aperture. */
+            var from = place(us[i - 1], base + BOX / 2, side);
+            var to   = place(u, base + BOX / 2, side);
+            var ctrl = place((us[i - 1] + u) / 2, base + BOX / 2 + 26, side);
+            shapes += '<path class="sr-scan" d="M' + from[0].toFixed(1) + ' ' +
+                      from[1].toFixed(1) + 'Q' + ctrl[0].toFixed(1) + ' ' +
+                      ctrl[1].toFixed(1) + ' ' + to[0].toFixed(1) + ' ' +
+                      to[1].toFixed(1) + '"/>';
+          }
+        });
+      }
+
+      conv(0); mlp(1); ssm(2); mlp(3);
+
+      /* The handle leaves from the corner arc, not from where the corner
+         would have been if it were square. */
+      var h = (SIDE - RX) + RX / Math.SQRT2;
+      svg.innerHTML =
+        '<defs>' +
+          '<linearGradient id="sr-rim" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#cf4832"/>' +
+            '<stop offset="1" stop-color="#1e73a6"/>' +
+          '</linearGradient>' +
+        '</defs>' +
+        '<line class="sr-handle" x1="' + h.toFixed(1) + '" y1="' + h.toFixed(1) +
+              '" x2="' + (HALF * 0.93).toFixed(1) + '" y2="' + (HALF * 0.93).toFixed(1) + '"/>' +
+        '<path class="sr-lat" d="' + stubs + '"/>' +
+        '<path class="sr-mesh" d="' + mesh + '"/>' +
+        '<rect class="sr-ring" x="' + -SIDE + '" y="' + -SIDE + '" width="' + (SIDE * 2) +
+              '" height="' + (SIDE * 2) + '" rx="' + RX + '"/>' +
+        shapes;
+      return svg;
+    }
+
+    function paint() {
+      queued = false;
+      lens.style.transform =
+        'translate3d(' + (px - HALF) + 'px,' + (py - HALF) + 'px,0)';
+
+      for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        var box = part.el.getBoundingClientRect();
+        if (!box.width) continue;                 /* a hidden preview section */
+
+        /* Each filtered element has its own coordinate system, with the
+           origin at its own top-left corner. */
+        var lx = px - box.left, ly = py - box.top;
+        part.seed.setAttribute('x', Math.round(lx - SIDE));
+        part.seed.setAttribute('y', Math.round(ly - SIDE));
+
+        /* The blur only has to cover the patch and its feather, clamped to
+           the element. Without the clamp a short element — the header logo
+           is 40px tall — gets a subregion entirely outside its own filter
+           region, which is silently dropped, and nothing lenses at all. */
+        var bx = Math.max(0, lx - SIDE - PAD);
+        var by = Math.max(0, ly - SIDE - PAD);
+        var bw = Math.min(box.width,  lx + SIDE + PAD) - bx;
+        var bh = Math.min(box.height, ly + SIDE + PAD) - by;
+        part.blur.setAttribute('x', Math.round(bx));
+        part.blur.setAttribute('y', Math.round(by));
+        part.blur.setAttribute('width',  Math.round(Math.max(0, bw)));
+        part.blur.setAttribute('height', Math.round(Math.max(0, bh)));
+      }
+    }
+
+    function schedule() {
+      if (!on || queued) return;
+      queued = true;
+      window.requestAnimationFrame(paint);
+    }
+
+    function track(ev) {
+      var t = ev.touches ? ev.touches[0] : ev;
+      if (!t) return;
+      px = t.clientX; py = t.clientY;
+      schedule();
+    }
+
+    function start() {
+      if (on || !lowField()) return;
+      on = true;
+
+      /* Photographs are resampled onto a canvas in low-field mode, and no
+         filter can undo that — inside the lens they would be the one thing
+         that failed to improve. Put them back to full quality and let the
+         filter do the degrading while the lens is up. */
+      doc.setAttribute('data-sr', 'on');
+      if (window.halflabField) window.halflabField.applyImages();
+
+      [].slice.call(document.querySelectorAll(TARGETS)).forEach(function (el, i) {
+        var f = template.cloneNode(true);
+        f.id = 'lofi-lens-' + i;
+        template.parentNode.appendChild(f);
+        /* Inline, so it wins over the stylesheet's plain #lofi. */
+        el.style.filter = 'url(#lofi-lens-' + i + ')';
+        parts.push({
+          el: el,
+          seed: f.querySelector('feFlood[flood-color]'),
+          blur: f.querySelector('feGaussianBlur')
+        });
+      });
+
+      lens = document.createElement('div');
+      lens.className = 'sr-lens';
+      lens.appendChild(graphic());
+      document.body.appendChild(lens);
+
+      note = document.createElement('div');
+      note.className = 'sr-note';
+      note.innerHTML = 'Super-resolution. What is under the lens has been ' +
+                       'reconstructed, not recovered. ' +
+                       '<button type="button" class="sr-stop">Stop</button>';
+      document.body.appendChild(note);
+      note.querySelector('.sr-stop').addEventListener('click', stop);
+
+      window.addEventListener('pointermove', track);
+      window.addEventListener('touchmove', track, { passive: true });
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      paint();
+    }
+
+    function stop() {
+      if (!on) return;
+      on = false;
+      window.removeEventListener('pointermove', track);
+      window.removeEventListener('touchmove', track);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      parts.forEach(function (p) {
+        p.el.style.filter = '';
+        var f = p.blur.parentNode;                 /* the cloned <filter> */
+        if (f && f.parentNode) f.parentNode.removeChild(f);
+      });
+      parts = [];
+      [lens, note].forEach(function (el) {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      });
+      lens = note = null;
+      typed = '';
+
+      doc.removeAttribute('data-sr');
+      if (window.halflabField) window.halflabField.applyImages();
+    }
+
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && on) { stop(); return; }
+      /* Single characters only — modifiers would fill the buffer with
+         'ShiftShiftShift' and the word could never complete. */
+      if (ev.key.length !== 1 || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      if (ev.target.closest && ev.target.closest('input, textarea')) return;
+      typed = (typed + ev.key).toLowerCase().slice(-8);
+      if (!lowField() || on) return;
+      for (var i = 0; i < WORDS.length; i++) {
+        if (typed.slice(-WORDS[i].length) === WORDS[i]) { start(); return; }
+      }
+    });
+
+    /* Switching back to high field takes the lens with it: there is nothing
+       left for it to do, and the filters it installed would keep the page
+       pixelated after the switch said otherwise. */
+    new MutationObserver(function () {
+      if (on && !lowField()) stop();
+    }).observe(doc, { attributes: true, attributeFilter: ['data-field'] });
+  })();
+{% endif %}
+
+{% if site.interactive.copy_citation %}
+  /* ---- copy a formatted reference ------------------------------------ */
+  (function () {
+    var pubs = document.querySelectorAll('.pub[data-cite]');
+    if (!pubs.length || !navigator.clipboard) return;
+    pubs.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cite-btn';
+      b.textContent = 'Copy reference';
+      b.addEventListener('click', function () {
+        navigator.clipboard.writeText(p.dataset.cite).then(function () {
+          b.textContent = 'Copied';
+          b.classList.add('done');
+          setTimeout(function () {
+            b.textContent = 'Copy reference';
+            b.classList.remove('done');
+          }, 1600);
+        });
+      });
+      p.appendChild(b);
+    });
+  })();
+{% endif %}
+})();
+</script>

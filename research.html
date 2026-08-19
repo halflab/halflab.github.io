@@ -1,0 +1,133 @@
+---
+layout: page
+title: Research
+permalink: /research/
+---
+
+<div class="overview-grid">
+  <div class="overview">
+    {{ site.data.research.overview | markdownify }}
+  </div>
+  {% include venn.html %}
+</div>
+
+{% assign v = site.approaches_variant | default: "a" %}
+
+{% if v == "a" or v == "both" %}
+  {% assign set = site.data.research.approach_sets.a %}
+  <section class="research-block">
+    <div class="section-head">
+      {% if v == "both" %}<p class="draft-marker">Draft A — the section repurposed</p>{% endif %}
+      <h2>{{ set.title }}</h2>
+      {% if set.lead %}<p class="section-lead">{{ set.lead }}</p>{% endif %}
+    </div>
+    <div class="grid grid-2">
+      {% for a in set.cards %}
+        <article class="card">
+          {% if a.icon %}<div class="card-icon">{% include icon.html name=a.icon %}</div>{% endif %}
+          <h3>{{ a.title }}</h3>
+          {% if a.short %}<p class="card-short">{{ a.short }}</p>{% endif %}
+          {{ a.body | markdownify }}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% if v == "b" or v == "both" %}
+  {% assign set = site.data.research.approach_sets.b %}
+  <section class="research-block">
+    <div class="section-head">
+      {% if v == "both" %}<p class="draft-marker">Draft B — the three headings, in depth</p>{% endif %}
+      <h2>{{ set.title }}</h2>
+      {% if set.lead %}<p class="section-lead">{{ set.lead }}</p>{% endif %}
+    </div>
+    <div class="grid grid-2">
+      {% for a in set.cards %}
+        <article class="card">
+          {% if a.icon %}<div class="card-icon">{% include icon.html name=a.icon %}</div>{% endif %}
+          <h3>{{ a.title }}</h3>
+          {% if a.short %}<p class="card-short">{{ a.short }}</p>{% endif %}
+          {{ a.body | markdownify }}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+
+<section class="research-block">
+  <div class="section-head wide">
+    <h2 class="rule-blue">Projects and datasets</h2>
+    {% if site.data.research.datasets_lead %}
+      <p class="section-lead">{{ site.data.research.datasets_lead }}</p>
+    {% endif %}
+  </div>
+
+  {% for g in site.data.research.dataset_groups %}
+    <h3 class="dataset-group">{{ g.title }}</h3>
+    <div class="dataset-list">
+      {% for d in g.items %}
+        <article class="dataset">
+          <div class="dataset-head">
+            <h3>{{ d.title }}</h3>
+            {% if d.full %}<p class="dataset-full">{{ d.full }}</p>{% endif %}
+          </div>
+          <div class="dataset-body">
+            {{ d.body | markdownify }}
+            {% if d.url %}
+              <p class="dataset-link">
+                <a href="{{ d.url }}">{{ d.link_label | default: "Link" }}</a>
+              </p>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</section>
+
+
+<section class="funders">
+  <h2>Funding</h2>
+  <p>We gratefully acknowledge support from:</p>
+
+  <div class="funder-row">
+    {% for f in site.data.funders.funders %}
+      {% comment %}
+        `title` alone is not announced reliably, and the logo image inside
+        carries the alt only when a logo file exists. aria-label is the one
+        thing every screen reader reads.
+      {% endcomment %}
+      <a class="funder" href="{{ f.url }}" title="{{ f.name }}" aria-label="{{ f.name }}">
+        {% if f.logo %}
+          <img src="{{ '/assets/img/funders/' | append: f.logo | relative_url }}" alt="{{ f.name }}" loading="lazy" decoding="async">
+        {% else %}
+          <span class="funder-wordmark">{{ f.short | default: f.name }}</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% comment %}
+    The acknowledgement is written and kept in _data/funders.yml, but it is
+    not shown until the grant references in it are real. Set
+    `show_acknowledgement: true` there to bring it back.
+  {% endcomment %}
+  {% if site.data.funders.show_acknowledgement and site.data.funders.acknowledgement %}
+    <p class="acknowledgement">{{ site.data.funders.acknowledgement }}</p>
+  {% endif %}
+</section>
+
+{% if site.data.funders.collaborators and site.data.funders.collaborators.size > 0 %}
+  <section class="funders">
+    <h2>Collaborators</h2>
+    <ul>
+      {% for c in site.data.funders.collaborators %}
+        <li>
+          {% if c.url %}<a href="{{ c.url }}">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}{% if c.institution %}, {{ c.institution }}{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}

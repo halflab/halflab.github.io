@@ -1,0 +1,62 @@
+# ============================================================
+#  HIGHLIGHTS — a short band of results at the top of the
+#  Publications page.
+#
+#  Keep this to three or four. The point is to show what the
+#  lab has actually found, not to duplicate the list below.
+#
+#  Fields:
+#    figure   image in assets/img/highlights/. Exported from the
+#             originals in FV_resources/highlights/ at up to
+#             900x560; aspect ratio is preserved and the card
+#             letterboxes whatever it gets, so a wide strip and
+#             a squarer plate both sit correctly.
+#    title    the paper's title, shown above the takeaway. Shorten
+#             it if it runs to more than about three lines.
+#    alt      what the figure shows, for screen readers
+#    takeaway one or two plain sentences. The finding, not the
+#             method, and not a sales pitch.
+#    paper    short reference shown under the takeaway
+#    url      where the title links
+# ============================================================
+
+highlights:
+
+  - figure: /assets/img/highlights/morphometry.jpg
+    title: >-
+      Ultra-low-field brain MRI morphometry: test–retest reliability and
+      correspondence to high-field MRI
+    alt: >-
+      Scatter plots of tissue volumes: 64 mT test against retest, and 64 mT
+      against 3 T, for cortical grey matter, subcortical grey matter, white
+      matter and CSF
+    takeaway: >-
+      Volumes measured at 64 mT are reliable across repeat scans and
+      correspond closely to 3 T. The paired data is openly available.
+    paper: Imaging Neuroscience, 2025
+    url: https://doi.org/10.1162/IMAG.a.930
+
+  - figure: /assets/img/highlights/gambas.jpg
+    title: >-
+      GAMBAS: Generalised-Hilbert Mamba for super-resolution of paediatric
+      ultra-low-field MRI
+    alt: >-
+      Architecture diagram of the GAMBAS network: an encoder and decoder
+      either side of bottleneck layers built from Mamba blocks
+    takeaway: >-
+      A state-space model with a 3D-to-1D serialisation super-resolves
+      paediatric low-field scans more faithfully than convolutional
+      baselines.
+    paper: Medical Imaging with Deep Learning, 2025
+    url: https://openreview.net/forum?id=ikfiyBBHAz
+
+  - figure: /assets/img/highlights/nullmodels.jpg
+    title: Null models in network neuroscience
+    alt: >-
+      The spin test: a brain map projected onto a sphere, rotated, and
+      projected back to give a permuted annotation
+    takeaway: >-
+      Which null model you choose changes whether a network finding looks
+      significant, so the choice needs to be justified.
+    paper: Nature Reviews Neuroscience, 2022
+    url: https://doi.org/10.1038/s41583-022-00601-9

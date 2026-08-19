@@ -1,0 +1,178 @@
+# ============================================================
+#  RESEARCH  — the /research/ page is built from this file.
+#
+#  Three parts:
+#    overview   : opening prose (Markdown allowed)
+#    approaches : what we do — methods and techniques
+#    datasets   : what we do it on — cohorts and applications
+#
+#  ⚠️  This is a first draft based on your notes. Please check
+#      the wording, and especially anything marked TBC.
+# ============================================================
+
+# ------------------------------------------------------------
+#  OVERVIEW
+#
+#  The prose is keyed to the Venn diagram beside it. Each <span data-t="...">
+#  names the set of circles a sentence belongs to, using the same keys as
+#  _includes/venn.html:
+#
+#      hf  high-field MRI      lf  low-field MRI
+#      nn  neural networks     bn  brain networks
+#
+#  A span lights up only when the cursor is in exactly that region — so
+#  data-t="hf" is a statement about high field alone, and data-t="hf lf" is
+#  a statement about the two together, which stays dark while you hover
+#  either circle on its own. Order inside the attribute does not matter.
+#
+#  A comma lists alternative regions that share one sentence.
+#
+#  Two combinations have no region: four equal circles in a square cannot
+#  give the diagonal pairs (lf+bn, hf+nn) any space of their own. Anything
+#  written for those would never light up.
+# ------------------------------------------------------------
+overview: >-
+  <span data-t="hf lf nn bn">We are a methodological neuroimaging lab: we work
+  across MRI field strengths, with both the neural networks we build and the
+  brain networks we study</span>.
+
+
+  <span data-t="hf">Conventional high-field MRI (&ge;&nbsp;1.5&nbsp;T) is the
+  clinical and research standard, and the source of most imaging phenotypes,
+  from regional volumes to whole-brain networks</span>.
+  <span data-t="lf">Portable low-field scanners (&lt;&nbsp;0.1&nbsp;T) are far
+  cheaper and run from an ordinary electrical socket, so they can go where
+  conventional MRI cannot</span>. <span data-t="hf lf">Scanning the same people
+  at both shows to what extent low-field measurements correspond to their
+  high-field counterparts</span>.
+
+
+  <span data-t="nn">Many of our methods use neural networks — deep learning
+  models for image translation, classification and regression</span>.
+  <span data-t="lf nn">On low-field images they support abnormality detection,
+  and foundation models pre-trained across scanners and populations</span>.
+  <span data-t="hf lf nn">Super-resolution learns the mapping between the two
+  regimes, pushing low-field scans towards high-field appearance</span>.
+
+
+  <span data-t="bn">A smaller strand of work treats the brain as a connected
+  system rather than a set of independent regions</span>.
+  <span data-t="hf bn, nn bn, hf nn bn, lf nn bn">Machine learning and null
+  models let us ask what network phenotypes add over simpler measures</span>,
+  <span data-t="hf lf bn">and whether they survive the move to low
+  field</span>.
+
+
+# ------------------------------------------------------------
+#  APPROACHES — the three cards on the HOME page ("Our work").
+#  Only `icon`, `title` and `short` are used there. The Research
+#  page no longer has this section; `body` is kept in case it
+#  comes back.
+# ------------------------------------------------------------
+approaches:
+
+  - title: Data acquisition
+    mark: DA
+    icon: brain-lr
+    key: acquisition
+    short: Scanning patients and healthy participants at high and low field.
+    body: >-
+      We acquire our own data as well as analysing others'. Scanning the same
+      individuals at both field strengths, and on repeat visits, is what lets
+      us say how reliable a low-field measurement is. Those paired datasets are
+      released openly wherever we can.
+
+  - title: Neural networks
+    mark: AI
+    icon: neural-network
+    key: neural
+    short: Super-resolution, abnormality detection and foundation models.
+    body: >-
+      **Super-resolution and image translation** map low-field scans towards
+      high-field appearance. **Abnormality detection** asks the screening
+      question rather than the diagnostic one. **Foundation models** offer
+      pre-training across many scanners and populations.
+
+  - title: Brain networks
+    mark: NN
+    icon: brain-network
+    key: brain
+    short: Brain network organisation, its added value and null models.
+    body: >-
+      We extract features of brain network organisation and ask how well they
+      correspond across field strengths, and what they add over simpler
+      phenotypes such as regional volumes. **Null models** — principled
+      randomisations — establish whether an apparent finding is real.
+
+
+# ------------------------------------------------------------
+#  PROJECTS AND DATASETS — the studies we run and the data we release.
+#  `datasets_lead` is the paragraph above the list.
+# ------------------------------------------------------------
+datasets_lead: >-
+  We analyse existing datasets and collect our own. Scanning the same people at
+  high and low field, and again on repeat visits, lets us tell a difference in
+  the brain from a difference in the scanner. Our paired datasets are released
+  openly.
+
+# Two groups, each rendered under its own sub-heading. `link_label`
+# names the button on the right; the title itself is never a link.
+dataset_groups:
+
+  - title: In-house studies
+    items:
+
+      - title: HYPE
+        full:
+        short: Paired ultra-low- and high-field scans, with low-field repeats.
+        url: https://openneuro.org/datasets/ds006557
+        link_label: OpenNeuro
+        body: >-
+          Healthy adults imaged at ultra-low and high field: T1- and
+          T2-weighted scans in a range of orientations and resolutions, with
+          the low-field session repeated. The repeats show how much a low-field
+          measurement varies between visits; the pairing with high field shows
+          how closely the two agree.
+
+      - title: APPMAD
+        full: AI-Powered Portable MRI Abnormality Detection
+        short: Adults referred for a head MRI for any clinical suspicion.
+        url:
+        body: >-
+          Adults at King's College Hospital referred for a head MRI for any
+          clinical reason. Because referrals are unfiltered, the range of
+          possible findings is wide, which is what an abnormality detection
+          tool would have to cope with in practice.
+
+      - title: UNITE
+        full: Ultra-low-field Neuroimaging in the Elderly
+        short: Patients assessed for cognitive decline in SLaM memory clinics.
+        url:
+        body: >-
+          Ultra-low-field imaging and automated analysis in patients seen at the
+          South London and Maudsley memory clinics. We are asking whether more
+          accessible imaging can support diagnosis and monitoring, in a patient
+          group that is ethnically and socio-economically diverse.
+
+  - title: Consortia and collaborations
+    items:
+
+      - title: UNITY
+        full: Ultra-low-field Neuroimaging in the Young
+        short: Multi-site ultra-low-field imaging of neurodevelopment.
+        url: # add the consortium website if there is a public one
+        body: >-
+          A consortium using portable ultra-low-field MRI to study brain
+          development in children in low- and middle-income countries, where
+          conventional scanners are largely unavailable. Much of our methods
+          work is developed on UNITY data.
+
+      - title: BONO
+        full: Safe Passage — Biomarkers of Neurodevelopmental Outcomes
+        short: South African cohort, followed from ages 4 to 16.
+        url:
+        # A second sentence on what the study investigates would balance this
+        # against the other entries — the rest are two sentences long.
+        body: >-
+          A South African cohort followed from ages 4 to 16, linking early-life
+          exposures to neurodevelopmental outcomes.

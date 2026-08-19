@@ -1,0 +1,82 @@
+# ============================================================
+#  FUNDERS
+#
+#  Each funder shows as a wordmark card until you add a logo
+#  file, at which point the logo replaces it automatically.
+#
+#  ⚠️  Funder logos must be the official files — all three of
+#      these have brand guidelines and none permit re-drawn or
+#      re-coloured versions. Download from the links in `brand`
+#      below, save into assets/img/funders/, then set `logo:`.
+#      Prefer SVG; otherwise PNG with a transparent background,
+#      around 400px wide.
+#
+#  Fields:
+#    name  : full funder name
+#    short : text shown if there's no logo file yet
+#    logo  : filename in assets/img/funders/
+#    url   : funder homepage
+#    brand : where to download the official logo (a note to you;
+#            not shown on the site)
+#    grant : optional — award title or reference
+# ============================================================
+
+funders:
+
+  - name: Gates Foundation
+    short: Gates Foundation
+    logo: Gates_Foundation_Logo.svg.webp
+    url: https://www.gatesfoundation.org
+    brand: https://www.gatesfoundation.org/about/policies/logo-usage-guidelines
+    grant: # e.g. "INV-123456"
+
+  - name: UK Research and Innovation
+    short: UKRI
+    logo: UKRI-Logo_Horiz-RGB.png
+    url: https://www.ukri.org
+    brand: https://www.ukri.org/manage-your-award/publishing-your-research-findings/acknowledging-your-funding/
+    grant: # e.g. "MR/XXXXXXX/1"
+
+  - name: NIHR Maudsley Biomedical Research Centre
+    short: NIHR Maudsley BRC
+    logo: NIHR_National_Institute_for_Health_and_Care_Research_logo.png
+    url: https://www.maudsleybrc.nihr.ac.uk
+    brand: https://www.nihr.ac.uk/about-us/who-we-are/nihr-brand-guidelines
+    grant:
+
+
+# ============================================================
+#  ACKNOWLEDGEMENT
+#  Shown beneath the logos. Funders often require specific
+#  wording — check each funder's guidance and edit this.
+# ============================================================
+# Hidden on the site until the grant references below are filled in.
+show_acknowledgement: false
+
+acknowledgement: >-
+  This work was supported by the Gates Foundation [INV-000000]; and the Medical
+  Research Council [MR/X000000/1]. The research was carried out at the National
+  Institute for Health and Care Research (NIHR) Maudsley Biomedical Research
+  Centre. The views expressed are those of the authors and not necessarily those
+  of the NHS, the NIHR or the Department of Health and Social Care.
+
+# ⚠️  Fill in the two grant references above, and check the funder list.
+#     Sources for the wording:
+#       UKRI — name the council in full, grant number in square brackets:
+#         https://www.ukri.org/manage-your-award/publishing-your-research-findings/acknowledging-your-funding/
+#         The logo shown is UKRI's; if the award is from the MRC the text
+#         should name the Medical Research Council, as it does above.
+#       NIHR Maudsley BRC — "carried out at" plus the disclaimer:
+#         https://www.maudsleybrc.nihr.ac.uk/research/acknowledging-the-brc/
+#         Use "was funded by the NIHR Maudsley BRC" instead of "carried out
+#         at" if the BRC is paying, rather than hosting.
+#       Gates Foundation grants use INV- references.
+
+
+# ============================================================
+#  COLLABORATORS — optional list of partner groups.
+# ============================================================
+collaborators:
+  # - name: Example Lab
+  #   institution: University of Somewhere
+  #   url: https://...

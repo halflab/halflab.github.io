@@ -1,0 +1,11 @@
+---
+# Front matter is what makes Jekyll process the Liquid below. Without these
+# two lines the file is copied across verbatim and the tags appear as text.
+---
+User-agent: *
+{% if site.noindex %}
+Disallow: /
+{% else %}
+Allow: /
+Sitemap: {{ '/sitemap.xml' | absolute_url }}
+{% endif %}

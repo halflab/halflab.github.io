@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title and page.title != "Home" %}{{ page.title }} · {{ site.short_name }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description | strip_newlines | truncate: 200 }}">
+
+  <link rel="icon" type="image/png" href="{{ '/assets/img/favicon.png' | relative_url }}">
+  <link rel="apple-touch-icon" href="{{ '/assets/img/favicon.png' | relative_url }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+
+  <script>
+    /* Runs before anything paints, so a visitor who chose dark never sees a
+       white flash. Anything that fails here — private browsing, storage
+       disabled — just leaves the site following the operating system. */
+    (function () {
+      var d = document.documentElement;
+      try {
+        var t = localStorage.getItem('halflab-theme');
+        if (t === 'dark' || t === 'light') d.setAttribute('data-theme', t);
+        if (localStorage.getItem('halflab-field') === 'low') d.setAttribute('data-field', 'low');
+      } catch (e) {}
+      var q = new URLSearchParams(window.location.search).get('field');
+      if (q !== null && parseFloat(q) > 0) d.setAttribute('data-field', 'low');
+    })();
+  </script>
+
+  {% if site.noindex %}
+    <!-- Set by `noindex` in _config.yml. Keeps the site out of search
+         results while it is being reviewed; it is not access control. -->
+    <meta name="robots" content="noindex, nofollow">
+  {% endif %}
+
+  <!-- The colour browsers paint the chrome with on mobile. -->
+  <meta name="theme-color" content="#cf4832" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1a1c" media="(prefers-color-scheme: dark)">
+
+  <!-- One address per page, so the prototype URL and the final one do not
+       both get indexed as separate sites. -->
+  <link rel="canonical" href="{{ page.url | absolute_url }}">
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }} — news"
+        href="{{ '/feed.xml' | absolute_url }}">
+
+  <!-- Social sharing preview. These have to be absolute URLs; a relative one
+       shows no image at all in Slack, Bluesky or a messaging app. `url` is
+       set in _config.yml — if it is empty, this silently breaks. -->
+  <meta property="og:title" content="{{ page.title | default: site.title }}">
+  <meta property="og:description" content="{{ page.description | default: site.description | strip_newlines | truncate: 200 }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:image" content="{{ '/assets/img/halflab_full_logo.png' | absolute_url }}">
+  <meta name="twitter:card" content="summary">
+
+  {% include schema.html %}
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {% comment %}
+    Pixelation for low-field mode. CSS cannot do this to text, but SVG can:
+    feFlood paints one dot per tile, feTile repeats it, compositing keeps
+    only the source colour under each dot, and feMorphology grows each dot
+    back into a square. The result is a genuine resample, so headings go
+    blocky exactly the way the images do.
+
+    The tile is 4px: coarse enough to read as resampling, fine enough
+    to leave body text legible.
+    Bumping `radius` and the flood rectangle together makes it coarser.
+  {% endcomment %}
+  <svg class="lofi-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="lofi" x="0" y="0" width="100%" height="100%"
+            color-interpolation-filters="sRGB">
+      <feFlood x="1" y="1" width="1" height="1"/>
+      <feComposite width="4" height="4"/>
+      <feTile result="tiles"/>
+      <feComposite in="SourceGraphic" in2="tiles" operator="in"/>
+      <feMorphology operator="dilate" radius="2"/>
+    </filter>
+
+    {% if site.interactive.sr_lens %}
+    {% comment %}
+      The same thing again, but with a patch under the pointer rendered by a
+      gentler chain — a super-resolution model applied to one window of the
+      image. The script clones this filter once per element it lenses — each
+      has its own user space, with its origin at its own top-left corner, so
+      the same pointer position is different coordinates in each.
+
+      The patch is square with rounded corners, which is what these models
+      actually operate on and is also much easier to place than a disc:
+      flood a square at the pointer, blur it, amplify the alpha so the middle
+      clamps solid. The amplification is what rounds the corners — a blurred
+      square has half coverage along its edges but only a quarter at each
+      corner, so thresholding above a quarter cuts them off. At this blur and
+      this slope the corner radius comes out at 47px, which is the radius the
+      frame is drawn with. Full strength to 141px, half at 160, gone by 191.
+
+      Everything here is positioned by the script, per element, in that
+      element's own coordinates. That matters: the first version placed the
+      patch at fixed coordinates well outside a short element, so the header
+      logo and the footer — 40px and 120px tall — had no patch at all and
+      never lensed. The blur's subregion is clamped to the element for the
+      same reason, and to keep its cost independent of the page's height.
+    {% endcomment %}
+    <filter id="lofi-lens" x="0" y="0" width="100%" height="100%"
+            color-interpolation-filters="sRGB">
+      {% comment %} Outside the patch: the low-field rendering, unchanged. {% endcomment %}
+      <feFlood x="1" y="1" width="1" height="1"/>
+      <feComposite width="4" height="4"/>
+      <feTile result="tiles"/>
+      <feComposite in="SourceGraphic" in2="tiles" operator="in"/>
+      <feMorphology operator="dilate" radius="2" result="coarse"/>
+
+      {% comment %}
+        Inside: half the block size and half the dilation. Deliberately not
+        the source image — a reconstruction is not a recovery, and at 2px it
+        still reads as slightly synthetic.
+
+        Photographs go through this too. While the lens is up the script puts
+        every image back to full quality and lets this chain degrade it, so
+        the lens improves a photograph the same way it improves a heading. A
+        canvas resample, which is what low-field mode does to images
+        otherwise, cannot be undone by any filter.
+      {% endcomment %}
+      <feFlood x="1" y="1" width="1" height="1"/>
+      <feComposite width="2" height="2"/>
+      <feTile result="tiles2"/>
+      <feComposite in="SourceGraphic" in2="tiles2" operator="in"/>
+      <feMorphology operator="dilate" radius="1" result="fine"/>
+
+      {% comment %} x/y/width/height on both of these are set per frame. {% endcomment %}
+      <feFlood flood-color="#fff" flood-opacity="1"
+               x="-9999" y="-9999" width="300" height="300" result="seed"/>
+      <feGaussianBlur in="seed" stdDeviation="22"
+                      x="-9999" y="-9999" width="0" height="0" result="blob"/>
+      <feComponentTransfer in="blob" result="patch">
+        <feFuncA type="linear" slope="1.5"/>
+      </feComponentTransfer>
+
+      <feComposite in="fine"   in2="patch" operator="in"  result="inside"/>
+      <feComposite in="coarse" in2="patch" operator="out" result="outside"/>
+      <feMerge>
+        <feMergeNode in="outside"/>
+        <feMergeNode in="inside"/>
+      </feMerge>
+    </filter>
+    {% endif %}
+  </svg>
+
+  {% include header.html %}
+
+  <main id="main" class="page-main">
+    {{ content }}
+  </main>
+
+  {% include footer.html %}
+
+  <script>
+    // Email addresses are stored split on the "@" and reassembled here, so
+    // the plain address never appears in the served HTML.
+    (function () {
+      document.querySelectorAll('[data-email-parts]').forEach(function (el) {
+        var bits = el.dataset.emailParts.split('|');
+        if (bits.length !== 2) return;
+        var addr = bits[0] + '@' + bits[1];
+        if (el.tagName === 'A') {            // an existing link, e.g. a button
+          el.href = 'mailto:' + addr;
+          return;
+        }
+        // Plain text, not a link: harder to scrape, and a mailto is of
+        // little use to anyone not running a desktop mail client.
+        el.textContent = bits[0] + '[at]' + bits[1];
+      });
+    })();
+
+    // Mobile navigation toggle
+    (function () {
+      var btn = document.querySelector('.nav-toggle');
+      var nav = document.querySelector('.site-nav');
+      if (!btn || !nav) return;
+      btn.addEventListener('click', function () {
+        var open = nav.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    })();
+  </script>
+
+  <script>
+    /* The two header switches. Each writes an attribute on <html>; the
+       stylesheet does the rest. */
+    (function () {
+      var d = document.documentElement;
+
+      function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+      function paintTheme() {
+        var dark = d.getAttribute('data-theme') === 'dark' ||
+          (!d.hasAttribute('data-theme') &&
+           window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var b = document.querySelector('[data-toggle="theme"]');
+        if (!b) return;
+        b.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        b.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+
+      function paintField() {
+        var low = d.getAttribute('data-field') === 'low';
+        var b = document.querySelector('[data-toggle="field"]');
+        if (!b) return;
+        b.setAttribute('aria-pressed', low ? 'true' : 'false');
+        b.setAttribute('aria-label', low ? 'Switch to high field' : 'Switch to low field');
+        b.setAttribute('title', low ? 'Low field' : 'High field');
+      }
+
+      var theme = document.querySelector('[data-toggle="theme"]');
+      if (theme) theme.addEventListener('click', function () {
+        var dark = d.getAttribute('data-theme') === 'dark' ||
+          (!d.hasAttribute('data-theme') &&
+           window.matchMedia('(prefers-color-scheme: dark)').matches);
+        d.setAttribute('data-theme', dark ? 'light' : 'dark');
+        save('halflab-theme', dark ? 'light' : 'dark');
+        paintTheme();
+      });
+
+      var field = document.querySelector('[data-toggle="field"]');
+      if (field) field.addEventListener('click', function () {
+        var low = d.getAttribute('data-field') === 'low';
+        if (low) { d.removeAttribute('data-field'); save('halflab-field', 'high'); }
+        else { d.setAttribute('data-field', 'low'); save('halflab-field', 'low'); }
+        paintField();
+      });
+
+      /* ---- the low-field rendering ----------------------------------
+         Genuinely resampled, not blurred: each image is drawn into a small
+         canvas, given per-pixel noise, then drawn back up with smoothing
+         off. That is what an ultra-low-field scan actually loses — voxels
+         and signal-to-noise — where a blur only looks out of focus.
+
+         The original src is kept on the element, so switching back is
+         instant and lossless. */
+      var RES = 0.085;                     /* fraction of the original size */
+      var NOISE = 26;                      /* peak-to-peak, out of 255 */
+
+      function degrade(img) {
+        if (img.dataset.hiSrc || !img.naturalWidth) return;
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var cw = Math.max(6, Math.round(w * RES));
+        var ch = Math.max(6, Math.round(h * RES));
+        try {
+          var small = document.createElement('canvas');
+          small.width = cw; small.height = ch;
+          var sx = small.getContext('2d');
+          sx.drawImage(img, 0, 0, cw, ch);
+
+          var d = sx.getImageData(0, 0, cw, ch), px = d.data;
+          for (var i = 0; i < px.length; i += 4) {
+            /* Two uniform draws approximate a normal one closely enough,
+               and are far cheaper than the real thing. */
+            var n = ((Math.random() + Math.random() - 1) * NOISE) | 0;
+            px[i] += n; px[i + 1] += n; px[i + 2] += n;
+          }
+          sx.putImageData(d, 0, 0);
+
+          /* Back up to the display size, hard edges preserved. */
+          var out = Math.min(w, 900);
+          var big = document.createElement('canvas');
+          big.width = out; big.height = Math.round(out * h / w);
+          var bx = big.getContext('2d');
+          bx.imageSmoothingEnabled = false;
+          bx.drawImage(small, 0, 0, big.width, big.height);
+
+          img.dataset.hiSrc = img.currentSrc || img.src;
+          img.src = big.toDataURL('image/png');
+        } catch (e) { /* a tainted canvas: leave the image alone */ }
+      }
+
+      function restore(img) {
+        if (!img.dataset.hiSrc) return;
+        img.src = img.dataset.hiSrc;
+        delete img.dataset.hiSrc;
+      }
+
+
+      /* Lazy images finish loading long after the switch was pressed. The
+         first version queued a degrade for each of them, which then ran
+         whenever the image happened to arrive — including after the switch
+         had been turned off again, leaving stray images stuck at low
+         quality. One capturing listener instead, which asks what the mode
+         is at the moment the image lands rather than remembering what it
+         was when the listener was attached.
+
+         `load` does not bubble, so this has to capture. Both degrade() and
+         restore() change src and so fire it again; degrade() returns early
+         when the original is already stashed, which ends the loop. */
+      document.addEventListener('load', function (ev) {
+        /* data-sr is the super-resolution lens: while it is up the images
+           are deliberately at full quality, because the lens degrades them
+           through the filter instead, and a late-arriving image must not be
+           quietly resampled behind its back. */
+        if (ev.target.tagName === 'IMG' &&
+            d.getAttribute('data-field') === 'low' &&
+            d.getAttribute('data-sr') !== 'on') {
+          degrade(ev.target);
+        }
+      }, true);
+
+      function applyField() {
+        var low = d.getAttribute('data-field') === 'low'
+               && d.getAttribute('data-sr') !== 'on';
+        [].slice.call(document.images).forEach(function (img) {
+          if (low) degrade(img);
+          else restore(img);
+        });
+        if (!document.querySelector('.field-grain')) {
+          var g = document.createElement('div');
+          g.className = 'field-grain';
+          document.body.appendChild(g);
+        }
+      }
+
+      /* The lens needs to put the photographs back to full quality while it
+         is up — a canvas resample cannot be undone by a filter, so an image
+         inside the lens would otherwise be the one thing that did not
+         improve. It is the only caller. */
+      window.halflabField = { applyImages: applyField };
+
+      paintTheme();
+      paintField();
+      document.addEventListener('DOMContentLoaded', applyField);
+      if (field) field.addEventListener('click', function () {
+        window.requestAnimationFrame(applyField);
+      });
+      /* Follow the system if the visitor has expressed no preference. */
+      window.matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', paintTheme);
+    })();
+  </script>
+
+  {% if site.interactive.field_easter %}
+  <script>
+    /* ?field=0.064 — the same rendering the header switch gives, but scaled
+       to whatever field strength you name. 3 T is the reference: ?field=1.5
+       is barely touched, ?field=0.05 is a smudge. The whole research
+       programme, as a query parameter. */
+    (function () {
+      var raw = new URLSearchParams(window.location.search).get('field');
+      if (raw === null) return;
+      var T = parseFloat(raw);
+      if (!(T > 0) || T > 7) return;
+
+      var ratio = Math.min(1, T / 3);
+      var d = document.documentElement;
+      d.setAttribute('data-field', 'low');
+      d.style.setProperty('--field-blur', ((1 - Math.sqrt(ratio)) * 5).toFixed(2) + 'px');
+      d.style.setProperty('--field-sat', (0.25 + 0.75 * ratio).toFixed(2));
+      d.style.setProperty('--field-contrast', (0.55 + 0.45 * ratio).toFixed(2));
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var bar = document.createElement('div');
+        bar.className = 'field-note-bar';
+        bar.innerHTML = 'Viewing this site at <strong>' + T + ' T</strong>. ' +
+          'Signal-to-noise falls with field strength — recovering what is lost ' +
+          'is what the lab works on. <a href="' + window.location.pathname +
+          '">Back to 3 T</a>';
+        document.body.appendChild(bar);
+      });
+    })();
+  </script>
+  {% endif %}
+
+  {% include interactive.html %}
+</body>
+</html>

@@ -1,0 +1,22 @@
+{% comment %}
+  A logo that works on either background.
+
+  Two <img>s rather than one: a media query alone cannot follow the header's
+  theme switch, and swapping `src` in script would flash. CSS hides whichever
+  is wrong, which is instant and works before any script runs.
+
+  include.file   base name in assets/img, without extension
+  include.class  class for both copies
+  include.alt    alt text (only the visible one is read; the other is hidden)
+  include.width / include.height  optional intrinsic size
+{% endcomment %}
+<img class="{{ include.class }} logo-light"
+     src="{{ '/assets/img/' | append: include.file | append: '.png' | relative_url }}"
+     alt="{{ include.alt }}"
+     {% if include.width %}width="{{ include.width }}" height="{{ include.height }}"{% endif %}
+     decoding="async">
+<img class="{{ include.class }} logo-dark"
+     src="{{ '/assets/img/' | append: include.file | append: '-dark.png' | relative_url }}"
+     alt="" aria-hidden="true"
+     {% if include.width %}width="{{ include.width }}" height="{{ include.height }}"{% endif %}
+     decoding="async">

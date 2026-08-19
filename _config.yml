@@ -1,0 +1,156 @@
+# ============================================================
+#  half lab website — site configuration
+#  Edit the values below; most of the site reads from here.
+# ============================================================
+
+title: half lab
+tagline: High and Low Field (Network Neuroimaging) laboratory
+short_name: half lab
+
+# Optional stacked logo on the home page hero. The header already carries
+# the one-line logo on every page, so this is off by default.
+#   none | band (centred above the hero) | column (above the slider)
+hero_logo: none
+
+# Which draft of the Research "Approaches" section to show:
+#   a  repurposed for data acquisition and sharing
+#   b  the three original headings, in depth
+#   both  shows the two for comparison   |   none  drops the section
+approaches_variant: none
+
+# ------------------------------------------------------------
+#  Interactive prototypes — flip any of these to false to drop
+#  the feature entirely (markup, CSS hook and script all go).
+# ------------------------------------------------------------
+# ------------------------------------------------------------
+#  VISIBILITY
+#
+#  true  — ask search engines to stay away, and block them in
+#          robots.txt. The site is still public to anyone with the
+#          address; this only keeps it out of search results, which
+#          is what you want while the lab is reviewing it.
+#  false — the site is open for indexing. Flip this on launch day.
+#
+#  GitHub Pages cannot restrict an organisation site to members of
+#  the organisation: access control needs Enterprise Cloud, and even
+#  there it only covers project sites. Unlisted is as close as this
+#  setup gets.
+# ------------------------------------------------------------
+noindex: true
+
+interactive:
+  nav_underline:   true   # nav rule slides to follow the cursor
+  venn_filter:     true   # hovering a Venn circle highlights matching cards
+  year_rail:       true   # publication year chips stick and track scrolling
+  dataset_expand:  false  # dataset entries on Research open on click
+  copy_citation:   true   # copy-reference button on each publication
+  highlights:      true   # figure highlights at the top of Publications
+  pub_filter:      true   # hf / lf / nn / bn buttons on Publications
+  field_easter:    true   # ?field=0.064 degrades every image on the site
+  null_easter:     true   # typing "null" on Publications shuffles the list
+  sr_lens:         true   # typing "gambas", "sr" or "iqt" in low field gives
+                          # a super-resolution lens that follows the pointer
+description: >-
+  The High and Low Field (Network Neuroimaging) Laboratory develops imaging
+  and AI methods across the full range of MRI field strengths — from portable
+  low-field scanners below 0.1 T to conventional systems at 1.5 T and above.
+
+# ------------------------------------------------------------
+#  URL SETTINGS  — see README.md
+#  Prototype (private repo, e.g. github.com/frantisekvasa/halflab-prototype):
+#      baseurl: "/halflab-prototype"
+#      url: "https://frantisekvasa.github.io"
+#  Final (organisation site at halflab.github.io):
+#      baseurl: ""
+#      url: "https://halflab.github.io"
+# ------------------------------------------------------------
+baseurl: ""
+url: "https://halflab.github.io"
+
+# Plugins. All three are on GitHub Pages' allow-list, so they run on the
+# live site without a build step of your own:
+#   sitemap  — /sitemap.xml, so search engines can find every page
+#   feed     — /feed.xml, an RSS feed of News
+#   seo-tag  — canonical links and richer social previews
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+
+feed:
+  path: feed.xml
+  collections:
+    news:
+      path: feed.xml
+
+# Institution / affiliation — shown in footer and Home page
+institution: King's College London
+institution_url: https://www.kcl.ac.uk
+department: Department of Neuroimaging, Institute of Psychiatry, Psychology & Neuroscience
+# Short form used in the footer
+department_short: Department of Neuroimaging, King's College London
+
+# Contact & social — leave blank to hide the link
+email: frantisek.vasa@kcl.ac.uk
+github: frantisekvasa
+bluesky: # e.g. halflab.bsky.social
+twitter: # e.g. halflab
+google_scholar: # full profile URL
+orcid: # e.g. 0000-0002-1234-5678
+address: |
+  Department of Neuroimaging
+  Institute of Psychiatry, Psychology & Neuroscience
+  King's College London
+  London SE5 8AF, United Kingdom
+
+# ------------------------------------------------------------
+#  Navigation — reorder or comment out lines to change the menu
+# ------------------------------------------------------------
+nav:
+  - title: Home
+    url: /
+  - title: Team
+    url: /team/
+  - title: Research
+    url: /research/
+  - title: Publications
+    url: /publications/
+  - title: Resources
+    url: /resources/
+  - title: News
+    url: /news/
+
+# ------------------------------------------------------------
+#  Build settings — you rarely need to touch anything below
+# ------------------------------------------------------------
+theme:
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+permalink: /news/:year/:month/:title/
+
+collections:
+  news:
+    output: true
+    permalink: /news/:year/:month/:title/
+
+defaults:
+  - scope:
+      path: ""
+      type: news
+    values:
+      layout: news_item
+
+sass:
+  style: compressed
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - logos
+  - .DS_Store
+  - node_modules

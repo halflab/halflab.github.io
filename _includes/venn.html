@@ -1,0 +1,83 @@
+{% comment %}
+  The four strands of the lab, and the double meaning of "NN":
+  neural networks (methods) and brain networks (application).
+
+  Label positions are the computed centroids of each circle's exclusive
+  region, so all four sit symmetrically: (129,104) (391,104) (129,366)
+  (391,366). Two-line labels straddle that point by ±11.
+
+  Hit-testing is done in script, geometrically: the rings are fill="none",
+  so the browser only registers them along the 2.5px stroke, and where four
+  strokes cross whichever is painted last wins. Instead, `.venn-surface`
+  (a transparent rect covering the whole viewBox) catches the pointer and
+  the script works out which circles actually contain that point — so the
+  overlap regions light up every circle they belong to.
+
+  data-cx / data-cy / data-r on each group are what the script reads; they
+  must stay in step with the <circle> below them. The keys hf / lf / nn / bn
+  are the same ones the overview text uses in _data/research.yml.
+
+  Note the geometric limit: four equal circles in a square produce 13 of the
+  15 possible regions. The two diagonal pairs — here lf+bn and hf+nn — have
+  no region of their own, so no text can be attached to them.
+{% endcomment %}
+
+<figure class="venn">
+  <div class="venn-stage">
+    <svg viewBox="0 0 520 470" role="img" aria-labelledby="venn-title venn-desc">
+      <title id="venn-title">The four strands of the half lab</title>
+      <desc id="venn-desc">
+        Four overlapping circles — high-field MRI, low-field MRI, brain networks
+        and neural networks — meeting at the lab logo in the centre.
+      </desc>
+
+      {% comment %}
+        Filled in by script: one <clipPath> chain and <mask> per region that
+        gets hovered, and the gradient-washed shape it clips. They sit before
+        the rings so the outlines and labels stay on top.
+      {% endcomment %}
+      <defs class="venn-defs"></defs>
+      <g class="venn-fills"></g>
+
+      <g class="venn-part" data-venn="hf" tabindex="0" role="button" aria-label="high-field MRI. Highlights the matching sentence" data-cx="185" data-cy="170" data-r="150">
+        <circle class="venn-ring" cx="185" cy="170" r="150" fill="none"
+                stroke="#cf4832" stroke-width="2.5" opacity=".85"/>
+        <text class="venn-label" x="129" y="93">high-field</text>
+        <text class="venn-label" x="129" y="116">MRI</text>
+      </g>
+
+      <g class="venn-part" data-venn="lf" tabindex="0" role="button" aria-label="low-field MRI. Highlights the matching sentence" data-cx="335" data-cy="170" data-r="150">
+        <circle class="venn-ring" cx="335" cy="170" r="150" fill="none"
+                stroke="#1e73a6" stroke-width="2.5" opacity=".85"/>
+        <text class="venn-label" x="391" y="93">low-field</text>
+        <text class="venn-label" x="391" y="116">MRI</text>
+      </g>
+
+      <g class="venn-part" data-venn="bn" tabindex="0" role="button" aria-label="brain networks. Highlights the matching sentence" data-cx="185" data-cy="300" data-r="150">
+        <circle class="venn-ring" cx="185" cy="300" r="150" fill="none"
+                stroke="#4d4d4d" stroke-width="2.5" opacity=".75"/>
+        <text class="venn-label" x="129" y="355">brain</text>
+        <text class="venn-label" x="129" y="378">networks</text>
+      </g>
+
+      <g class="venn-part" data-venn="nn" tabindex="0" role="button" aria-label="neural networks. Highlights the matching sentence" data-cx="335" data-cy="300" data-r="150">
+        <circle class="venn-ring" cx="335" cy="300" r="150" fill="none"
+                stroke="#9a9da1" stroke-width="2.5" opacity=".9"/>
+        <text class="venn-label" x="391" y="355">neural</text>
+        <text class="venn-label" x="391" y="378">networks</text>
+      </g>
+
+      <rect class="venn-surface" x="0" y="0" width="520" height="470"/>
+    </svg>
+
+    {% include logo.html file='halflab_mini_logo' class='venn-logo' alt='half lab' %}
+  </div>
+
+  <p class="venn-hint">Tap a region</p>
+  <p class="venn-keyhint">Tab to a circle, or hover the diagram</p>
+
+  <figcaption>
+    Two field-strength regimes, and two types of network —<br>
+    the neural networks we build, and the brain networks we study.
+  </figcaption>
+</figure>

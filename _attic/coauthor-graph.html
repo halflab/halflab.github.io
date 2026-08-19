@@ -1,0 +1,228 @@
+{% comment %}
+  THE CO-AUTHOR NETWORK — removed from the site on 5 August 2026, kept here
+  intact in case it comes back. Nothing includes this file, and Jekyll does
+  not copy directories beginning with an underscore, so it never reaches the
+  built site.
+
+  To restore:
+
+  1. Put the script block below back into _includes/interactive.html,
+     anywhere inside the outer IIFE.
+  2. Put the markup back into publications.html, above the "Full list"
+     heading.
+  3. Put the CSS back into assets/css/style.css.
+  4. Add `coauthors: true` under `interactive:` in _config.yml.
+
+  It reads `data-authors` on each .pub, which carries `authors_full` — the
+  complete byline rather than the abbreviated one on screen — so the graph is
+  not distorted by what fitted on the line. That field is still in
+  _data/publications.yml, so nothing needs regenerating.
+{% endcomment %}
+
+<!-- ---------- markup, for publications.html ---------- -->
+<!--
+  <section class="coauthors" hidden>
+    <div class="section-head">
+      <h2 class="rule-charcoal">Who we work with</h2>
+      <p class="section-lead">
+        Everyone who appears on a paper with us, drawn from the full author
+        lists. Two people are joined when they share a paper; the more they
+        share, the shorter the link between them.
+      </p>
+    </div>
+    <div class="coauthor-stage">
+      <canvas class="coauthor-canvas" width="1200" height="560"
+              aria-label="Network of co-authors" role="img"></canvas>
+      <p class="coauthor-readout" aria-live="polite"></p>
+    </div>
+  </section>
+-->
+
+<!-- ---------- CSS, for assets/css/style.css ---------- -->
+<!--
+.coauthors { margin: 0 0 2.6rem; }
+.coauthor-stage {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg); padding: .4rem;
+}
+.coauthor-canvas { width: 100%; height: auto; display: block; }
+.coauthor-readout {
+  font-family: var(--font-display); font-weight: 600; font-size: .8rem;
+  color: var(--muted); margin: .2rem .6rem .4rem; min-height: 1.2em;
+}
+@media (max-width: 700px) { .coauthor-stage { padding: .2rem; } }
+-->
+
+<!-- ---------- script, for _includes/interactive.html ---------- -->
+{% if site.interactive.coauthors %}
+  /* ---- the people behind the list ------------------------------------
+     Built from data-authors, which carries the full byline rather than the
+     abbreviated one on screen, so the graph is not distorted by what the
+     line had room for.
+
+     A tiny force layout on a canvas: repulsion between every pair, springs
+     along shared papers, and a pull towards the middle. Canvas rather than
+     SVG because 200-odd nodes redrawn 300 times is a lot of DOM. */
+  (function () {
+    var section = document.querySelector('.coauthors');
+    var canvas = section && section.querySelector('.coauthor-canvas');
+    if (!canvas || !canvas.getContext) return;
+
+    var pubs = [].slice.call(document.querySelectorAll('.pub[data-authors]'));
+    if (pubs.length < 2) return;
+
+    /* ---- build the graph ---- */
+    var index = {}, nodes = [], edges = {};
+    function nodeFor(name) {
+      if (!(name in index)) {
+        index[name] = nodes.length;
+        nodes.push({ name: name, papers: 0, lab: false });
+      }
+      return nodes[index[name]];
+    }
+    pubs.forEach(function (p) {
+      var names = p.dataset.authors.split(', ')
+        .map(function (n) { return n.trim(); })
+        .filter(function (n) { return n && n !== '[...]' && !/consortium|team /i.test(n); });
+      names.forEach(function (n) { nodeFor(n).papers++; });
+      for (var i = 0; i < names.length; i++) {
+        for (var j = i + 1; j < names.length; j++) {
+          var a = index[names[i]], b = index[names[j]];
+          var key = Math.min(a, b) + '-' + Math.max(a, b);
+          edges[key] = (edges[key] || 0) + 1;
+        }
+      }
+    });
+    /* Lab members are the ones the publication list bolds. */
+    [].slice.call(document.querySelectorAll('.pub-authors strong')).forEach(function (el) {
+      var n = el.textContent.trim().replace(/\*/g, '');
+      if (n in index) nodes[index[n]].lab = true;
+    });
+
+    var links = Object.keys(edges).map(function (k) {
+      var ab = k.split('-');
+      return { a: +ab[0], b: +ab[1], w: edges[k] };
+    });
+    if (nodes.length < 3) return;
+    section.hidden = false;
+
+    /* ---- layout ---- */
+    var W = canvas.width, H = canvas.height;
+    nodes.forEach(function (n, i) {
+      var a = (i / nodes.length) * Math.PI * 2;
+      n.x = W / 2 + Math.cos(a) * (W / 3.4);
+      n.y = H / 2 + Math.sin(a) * (H / 3.0);
+      n.vx = n.vy = 0;
+    });
+
+    function step() {
+      var i, j, a, b, dx, dy, d2, d, f;
+      for (i = 0; i < nodes.length; i++) {
+        a = nodes[i];
+        for (j = i + 1; j < nodes.length; j++) {
+          b = nodes[j];
+          dx = b.x - a.x; dy = b.y - a.y;
+          d2 = dx * dx + dy * dy || 0.01;
+          if (d2 > 90000) continue;              /* far apart: ignore */
+          f = 900 / d2;
+          d = Math.sqrt(d2);
+          a.vx -= f * dx / d; a.vy -= f * dy / d;
+          b.vx += f * dx / d; b.vy += f * dy / d;
+        }
+      }
+      links.forEach(function (l) {
+        a = nodes[l.a]; b = nodes[l.b];
+        dx = b.x - a.x; dy = b.y - a.y;
+        d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        f = (d - 70 / Math.sqrt(l.w)) * 0.012 * Math.min(l.w, 4);
+        a.vx += f * dx / d; a.vy += f * dy / d;
+        b.vx -= f * dx / d; b.vy -= f * dy / d;
+      });
+      nodes.forEach(function (n) {
+        n.vx += (W / 2 - n.x) * 0.0016;
+        n.vy += (H / 2 - n.y) * 0.0016;
+        n.x += (n.vx *= 0.82);
+        n.y += (n.vy *= 0.82);
+        n.x = Math.max(24, Math.min(W - 24, n.x));
+        n.y = Math.max(24, Math.min(H - 24, n.y));
+      });
+    }
+
+    function css(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+    function radius(n) { return 3 + Math.min(Math.sqrt(n.papers) * 2.4, 11); }
+
+    var hover = null;
+    function draw() {
+      var ink = css('--ink') || '#2e2e2e';
+      var line = css('--line') || '#e2e3e5';
+      var red = css('--red') || '#cf4832';
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.lineWidth = 1;
+      links.forEach(function (l) {
+        var a = nodes[l.a], b = nodes[l.b];
+        var on = hover && (a === hover || b === hover);
+        ctx.strokeStyle = on ? red : line;
+        ctx.globalAlpha = on ? 0.9 : 0.5;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+
+      nodes.forEach(function (n) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, radius(n), 0, Math.PI * 2);
+        ctx.fillStyle = n === hover ? red : (n.lab ? red : (css('--muted') || '#77797c'));
+        ctx.globalAlpha = n.lab || n === hover ? 1 : 0.55;
+        ctx.fill();
+        if (n.lab) {
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = ink;
+          ctx.font = '600 12px ' + (css('--font-display') || 'sans-serif');
+          ctx.textAlign = 'center';
+          ctx.fillText(n.name, n.x, n.y - radius(n) - 5);
+        }
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    var ctx = canvas.getContext('2d');
+    var readout = section.querySelector('.coauthor-readout');
+
+    /* Settle it before the first paint rather than animating from a ring —
+       the animation is not the point, the shape is. */
+    var iterations = reduce ? 400 : 300;
+    for (var t = 0; t < iterations; t++) step();
+    draw();
+    readout.textContent = nodes.length + ' people, ' + links.length +
+                          ' co-authorships, across ' + pubs.length + ' papers.';
+
+    canvas.addEventListener('pointermove', function (ev) {
+      var r = canvas.getBoundingClientRect();
+      var x = (ev.clientX - r.left) * (W / r.width);
+      var y = (ev.clientY - r.top) * (H / r.height);
+      var found = null, best = 1e9;
+      nodes.forEach(function (n) {
+        var d = (n.x - x) * (n.x - x) + (n.y - y) * (n.y - y);
+        if (d < best && d < 400) { best = d; found = n; }
+      });
+      if (found !== hover) {
+        hover = found;
+        draw();
+        readout.textContent = hover
+          ? hover.name + ' — ' + hover.papers + (hover.papers === 1 ? ' paper' : ' papers')
+          : nodes.length + ' people, ' + links.length + ' co-authorships, across ' +
+            pubs.length + ' papers.';
+      }
+    });
+    canvas.addEventListener('pointerleave', function () {
+      hover = null; draw();
+      readout.textContent = nodes.length + ' people, ' + links.length +
+                            ' co-authorships, across ' + pubs.length + ' papers.';
+    });
+  })();
+{% endif %}
+

@@ -1,0 +1,34 @@
+---
+layout: page
+title: News
+permalink: /news/
+---
+
+{% assign items = site.news | sort: "date" | reverse %}
+
+{% if items.size > 0 %}
+  <ul class="news-list">
+    {% for item in items %}
+      <li class="news-entry">
+        <p class="news-date">{{ item.date | date: "%-d %b %Y" }}</p>
+        <div class="news-full">
+          {% comment %}
+            The whole post, not a summary: there are few enough of these that
+            making someone click through to read three sentences — and click
+            back — is worse than simply showing them. The post keeps its own
+            page for linking to; the heading is that link.
+          {% endcomment %}
+          <h2 class="news-title"><a href="{{ item.url | relative_url }}">{{ item.title }}</a></h2>
+          {% if item.image %}
+            <img class="news-hero" src="{{ item.image | relative_url }}"
+                 alt="{{ item.image_alt | default: item.title }}"
+                 loading="lazy" decoding="async">
+          {% endif %}
+          {{ item.content }}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No news yet.</p>
+{% endif %}

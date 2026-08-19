@@ -1,0 +1,22 @@
+{% comment %}
+  Card icons for the "Our work" / "Approaches" sections.
+
+  These are generated from the source artwork in
+  FV_resources/images_for_graphics/ by tools/make_icons.py — re-run that
+  script if the artwork changes. They are flat PNGs rather than inline SVG
+  because they are recoloured at build time, not by CSS.
+
+  Usage: {% include icon.html name="brain-lr" %}
+    brain-lr        whole brain, left hemisphere red / right blue
+    neural-network  hemisphere + feed-forward network, charcoal
+    brain-network   hemisphere + graph, lighter grey
+{% endcomment %}
+
+{% case include.name %}
+  {% when "brain-lr" %}
+    <img src="{{ '/assets/img/icons/brain-lr.png' | relative_url }}" alt="" aria-hidden="true" loading="lazy" decoding="async">
+  {% when "neural-network" %}
+    <img src="{{ '/assets/img/icons/neural-network.png' | relative_url }}" alt="" aria-hidden="true" loading="lazy" decoding="async">
+  {% when "brain-network" %}
+    <img src="{{ '/assets/img/icons/brain-network.png' | relative_url }}" alt="" aria-hidden="true" loading="lazy" decoding="async">
+{% endcase %}
