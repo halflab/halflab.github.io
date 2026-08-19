@@ -980,11 +980,8 @@ a.tag:hover { filter: brightness(.93); }
   border-radius: 9px; background: #000;
   user-select: none; touch-action: pan-y;
 }
-/* Both layers are sprite sheets; background-size and position are set in JS.
-   Which sheet is showing is CSS's business: the crisp pair normally, the
-   pre-degraded pair in low-field mode. */
+/* Both layers are sprite sheets; background-size and position are set in JS. */
 .scan-img {
-  background-image: var(--scan-hi);
   position: absolute; inset: 0;
   background-repeat: no-repeat; background-color: #000;
 }
@@ -1683,46 +1680,20 @@ a.tag:hover { filter: brightness(.93); }
   image-rendering: pixelated;
 }
 
-/* The page itself is resampled, not just the pictures: the blocks of #main
-   and the footer run through the SVG filter above, so headings, the year bar
-   and the body text all go blocky. The header is left alone — the switch that
-   turns this off has to stay legible, and filtering a sticky element breaks
-   the sticky.
+/* The page itself is resampled, not just the pictures: #main and the footer
+   run through the SVG filter above, so headings, the year bar and the body
+   text all go blocky. The header is left alone — the switch that turns this
+   off has to stay legible, and filtering a sticky element breaks the sticky.
 
    Text is smaller than the tiles, so it degrades further than the images do;
    that is the honest direction, but it is why the tile is only 3px.
 
-   Each block is filtered separately rather than #main as a whole. One filter
-   over the entire page means one filtered surface several thousand pixels
-   tall, which mobile Safari either renders blank or gives up on entirely —
-   the page appeared to lose most of its content. Per block, each surface is a
-   screen or two at most. The only visible difference is that the 4px tile
-   grid restarts at each block boundary.
-
-   Two selectors because there are two page shapes: Home puts its sections
-   straight into #main, while every other page goes through the `page` layout,
-   which wraps the content in .page-body. Splitting only at #main's children
-   would leave those pages with a single surface again.
-
-   The hero is filtered through .hero-text rather than as a whole, which keeps
-   the scan comparison out of the filtered subtree. On iOS every filtered
-   element on the home page — down to the logo in the header — rendered for
-   under a second and then blanked, while other pages were fine. The scan
-   comparison is what Home has that they do not, and it holds three things
-   WebKit struggles to composite under an SVG filter: a clip-path (the only
-   one in the stylesheet), two 1500x1200 sprite sheets as backgrounds, and a
-   slider thumb 100vh tall. Taking the whole subtree out of the filter avoids
-   having to know which of the three it was.
-
-   It still degrades: tools/make_scans_lofi.py writes a resampled copy of each
-   sprite sheet, and the rule below swaps to them. Baked into the image rather
-   than applied at display time, which is both what actually happens to a scan
-   at low field and something no compositor can choke on. */
-:root[data-field="low"] .page-main > *:not(.wrap):not(.pub-filters):not(.hero),
-:root[data-field="low"] .hero-text,
-:root[data-field="low"] .hero-logo-band,
-:root[data-field="low"] .page-main > .page-head,
-:root[data-field="low"] .page-body > *:not(.pub-filters),
+   #main is filtered whole, deliberately, and not block by block. WebKit
+   renders feTile as nothing at all on a short element — tested on the device
+   across eight variants — and feTile is what draws the grid. A page's #main
+   is thousands of pixels tall and lands on the working side of that; its
+   individual sections do not. */
+:root[data-field="low"] .page-main,
 :root[data-field="low"] .site-footer,
 /* The mark in the corner too — it is the first thing anyone looks at, and
    leaving it crisp made the effect look like a rendering fault rather than
@@ -1756,11 +1727,6 @@ a.tag:hover { filter: brightness(.93); }
 <filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/>\
 <feColorMatrix type='saturate' values='0'/></filter>\
 <rect width='120' height='120' filter='url(%23n)' opacity='0.55'/></svg>");
-  --grid-line: rgba(255,255,255,.42);
-}
-:root[data-theme="dark"] { --grid-line: rgba(0,0,0,.5); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --grid-line: rgba(0,0,0,.5); }
 }
 
 .field-grain {
@@ -1774,53 +1740,23 @@ a.tag:hover { filter: brightness(.93); }
 
 /* -webkit-hyphens is a Safari-only property, so this block is "if WebKit".
    Not a touch-device query: the fault is in the engine, not the form factor.
-   An iPad with a keyboard reports a fine pointer and would have kept the
-   broken version, and Safari on a Mac is the same engine again. */
+
+   feTile comes out blank on a short element there, so the two short ones opt
+   out and stay crisp rather than disappearing. The footer and the logo are
+   the only casualties, and a crisp logo is a great deal better than no logo.
+   Everything in #main degrades exactly as it does everywhere else. */
 @supports (-webkit-hyphens: none) {
-  /* Blur to lose the fine detail, then a grid drawn over the top to put the
-     raster back. Not a true resample — the colours are not quantised — but at
-     a phone's pixel density it reads as one, and it is the only route to a
-     blocky page here: WebKit renders feTile as nothing on any element that
-     isn't extremely tall, and feTile is what makes the grid.
-
-     Tested on the device, on a page of eight variants: every chain containing
-     feTile came out blank, on short blocks and only on short blocks;
-     feMorphology, feComponentTransfer and feGaussianBlur all worked; and this
-     one worked. */
-  :root {
-    --lofi-filter: blur(1.15px) contrast(1.12) saturate(.78);
-  }
-
-  /* The same fixed sheet that carries the grain carries the grid. One layer
-     for the whole viewport, so the cost does not scale with the page. */
-  :root[data-field="low"] .field-grain {
-    opacity: 1;
-    /* multiply would erase the light grid lines against pale backgrounds */
-    mix-blend-mode: normal;
-    background-image:
-      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
-      var(--grain-img);
-    background-size: 4px 4px, 4px 4px, 120px 120px;
+  :root[data-field="low"] .site-footer,
+  :root[data-field="low"] .brand {
+    filter: none;
   }
 }
 
-/* The scan comparison swaps to the pre-degraded sprite sheets. This is the
-   one part of the page whose low-field rendering is a different file rather
-   than a filter — see the note above, and tools/make_scans_lofi.py. */
-:root[data-field="low"] .scan-img { background-image: var(--scan-lo); }
+/* The scan comparison is inside #main, so the page filter degrades it along
+   with everything else. tools/make_scans_lofi.py can bake the degradation
+   into a second pair of sprite sheets instead — needed only if this figure
+   ever has to sit outside the filtered element again. */
 :root[data-field="low"] .scan-frame { border-color: var(--blue); }
-
-/* Except while the super-resolution lens is up. A filter cannot undo a
-   degradation that is baked into a file, so the crisp sheets go back and the
-   script puts this figure under the lens filter with everything else — coarse
-   outside the patch, finer inside, the same as the rest of the page. The
-   filter is only on this subtree for as long as the lens is, which is why it
-   can be here at all: filtering it permanently is what blanked the page on
-   iOS, and the lens needs a keyboard to summon. */
-:root[data-field="low"][data-sr="on"] .scan-img {
-  background-image: var(--scan-hi);
-}
 @media (prefers-reduced-motion: reduce) {
   .field-grain { transition: none; }
 }

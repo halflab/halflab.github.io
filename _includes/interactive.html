@@ -650,19 +650,23 @@
     var template = document.getElementById('lofi-lens');
     if (!template) return;
 
+    /* Not in WebKit. The lens filters a patch of the page through the same
+       feTile chain the rest of low-field mode uses, and WebKit renders feTile
+       as nothing on any element that is not very tall — so the lens would
+       blank whatever it touched. Nothing is lost on a phone, which has no
+       keyboard to type the word with; on a Mac, Safari misses out.
+
+       -webkit-hyphens is a Safari-only property, which is the least
+       unreliable way to ask "is this WebKit" from script. */
+    if (window.CSS && CSS.supports && CSS.supports('-webkit-hyphens', 'none')) {
+      return;
+    }
+
     var WORDS = ['gambas', 'sr', 'iqt'];
     /* Every match, not the first: the offline preview holds all the pages in
        one document as several .page-main sections, and lensing only the first
        of them left the egg working on Home and nowhere else. */
-    /* .scan-compare is deliberately not filtered by the stylesheet — doing so
-       blanks the whole page on iOS — but it joins in while the lens is up,
-       because its low-field rendering is a second set of images and no filter
-       can reconstruct those. The stylesheet puts the crisp sheets back for as
-       long as data-sr is on. */
-    var TARGETS = '.page-main > *:not(.wrap):not(.pub-filters):not(.hero), ' +
-                  '.hero-text, .hero-logo-band, .scan-compare, ' +
-                  '.page-main > .page-head, .page-body > *:not(.pub-filters), ' +
-                  '.site-footer, .brand';
+    var TARGETS = '.page-main, .site-footer, .brand';
     var SIDE = 150;      /* half the patch: the aperture is 300px square */
     var HALF = 262;      /* half the whole graphic, blocks and handle */
     var RX = 46;         /* corner radius — matches what the filter produces */
