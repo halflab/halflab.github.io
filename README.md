@@ -1,3 +1,10 @@
+<!-- The dark version is served to anyone reading GitHub in dark mode; the
+     artwork is charcoal on transparency and would otherwise disappear. -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/img/halflab_horiz_logo-dark.png">
+  <img src="assets/img/halflab_horiz_logo.png" alt="half lab" width="360">
+</picture>
+
 # half lab website
 
 Source for the website of the **half lab** — the High and Low Field (Network
