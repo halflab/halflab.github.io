@@ -1680,14 +1680,30 @@ a.tag:hover { filter: brightness(.93); }
   image-rendering: pixelated;
 }
 
-/* The page itself is resampled, not just the pictures: #main and the footer
-   run through the SVG filter above, so headings, the year bar and the body
-   text all go blocky. The header is left alone — the switch that turns this
-   off has to stay legible, and filtering a sticky element breaks the sticky.
+/* The page itself is resampled, not just the pictures: the blocks of #main
+   and the footer run through the SVG filter above, so headings, the year bar
+   and the body text all go blocky. The header is left alone — the switch that
+   turns this off has to stay legible, and filtering a sticky element breaks
+   the sticky.
 
    Text is smaller than the tiles, so it degrades further than the images do;
-   that is the honest direction, but it is why the tile is only 3px. */
-:root[data-field="low"] .page-main,
+   that is the honest direction, but it is why the tile is only 3px.
+
+   Each block is filtered separately rather than #main as a whole. One filter
+   over the entire page means one filtered surface several thousand pixels
+   tall, which mobile Safari either renders blank or gives up on entirely —
+   the page appeared to lose most of its content. Per block, each surface is a
+   screen or two at most. The only visible difference is that the 4px tile
+   grid restarts at each block boundary.
+
+   Two selectors because there are two page shapes: Home puts its sections
+   straight into #main, while every other page goes through the `page` layout,
+   which wraps the content in .page-body. Splitting only at #main's children
+   would leave those pages with a single surface again — which is the case
+   that broke. */
+:root[data-field="low"] .page-main > *:not(.wrap):not(.pub-filters),
+:root[data-field="low"] .page-main > .page-head,
+:root[data-field="low"] .page-body > *:not(.pub-filters),
 :root[data-field="low"] .site-footer,
 /* The mark in the corner too — it is the first thing anyone looks at, and
    leaving it crisp made the effect look like a rendering fault rather than

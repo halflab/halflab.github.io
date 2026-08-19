@@ -654,7 +654,9 @@
     /* Every match, not the first: the offline preview holds all the pages in
        one document as several .page-main sections, and lensing only the first
        of them left the egg working on Home and nowhere else. */
-    var TARGETS = '.page-main, .site-footer, .brand';
+    var TARGETS = '.page-main > *:not(.wrap):not(.pub-filters), ' +
+                  '.page-main > .page-head, .page-body > *:not(.pub-filters), ' +
+                  '.site-footer, .brand';
     var SIDE = 150;      /* half the patch: the aperture is 300px square */
     var HALF = 262;      /* half the whole graphic, blocks and handle */
     var RX = 46;         /* corner radius — matches what the filter produces */
