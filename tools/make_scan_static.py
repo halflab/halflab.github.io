@@ -5,11 +5,13 @@ A single static image of the scan comparison, for touch devices.
 The interactive figure is three things WebKit will not composite under an
 SVG filter: a clip-path, two large sprite sheets as backgrounds, and a slider
 thumb 100vh tall. On a phone that combination blanked the whole home page in
-low-field mode. Rather than fight it, phones get this picture instead — the
-same comparison, the same diagonal, no moving parts.
+low-field mode. So in that one state — low field, WebKit — the figure steps
+aside for this picture: the same comparison, the same diagonal, no moving
+parts. At high field, and in every other browser, the slider is what shows.
 
-Two files are written: the normal one, and a resampled copy for low-field
-mode, since a picture cannot be degraded by a filter that will not run.
+One file is written, already resampled: the still only ever appears in
+low-field mode, where the filter that would have degraded it is the one
+that cannot run.
 
 Usage:
     python3 tools/make_scan_static.py
@@ -90,18 +92,17 @@ def main():
                                  sp["cols"], sp["size"], mid)
 
     full = compose(sheets["over"], sheets["under"], sp["size"])
-    a = os.path.join(OUT, "scan-static.jpg")
-    full.save(a, "JPEG", quality=88, optimize=True, progressive=True)
 
-    b = os.path.join(OUT, "scan-static-lofi.jpg")
-    degrade(full, FACTOR, NOISE).save(b, "JPEG", quality=82, optimize=True,
+    # Only the degraded one is ever served: the still stands in for the
+    # figure exclusively in low-field mode, where a crisp copy would be wrong.
+    out = os.path.join(OUT, "scan-static-lofi.jpg")
+    degrade(full, FACTOR, NOISE).save(out, "JPEG", quality=82, optimize=True,
                                       progressive=True)
-
-    for p in (a, b):
-        print("  %-24s %dx%d  %d KB"
-              % (os.path.basename(p), sp["size"], sp["size"],
-                 os.path.getsize(p) // 1024))
-    print("\nUsed on touch devices in place of the interactive figure.")
+    print("  %-24s %dx%d  %d KB"
+          % (os.path.basename(out), sp["size"], sp["size"],
+             os.path.getsize(out) // 1024))
+    print("\nShown in place of the interactive figure in low-field mode,\n"
+          "in WebKit only. Everywhere else the slider is what renders.")
 
 
 if __name__ == "__main__":

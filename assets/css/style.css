@@ -1764,6 +1764,18 @@ a.tag:hover { filter: brightness(.93); }
   :root[data-field="low"] .hero h1 .accent-red  { color: var(--red); }
   :root[data-field="low"] .hero h1 .accent-blue { color: var(--blue); }
 
+  /* The slider is what the page filter cannot cope with here: its clip-path,
+     its sprite-sheet backgrounds and its 100vh slider thumb. In low field it
+     steps aside for a still — display:none, so none of it is painted at all
+     — and the still is already resampled, since the filter that would have
+     degraded it is the one that cannot run. Switch back to high field and the
+     draggable figure returns. */
+  :root[data-field="low"] .scan-body { display: none; }
+  :root[data-field="low"] .scan-static {
+    display: block; width: 100%; max-width: 500px; height: auto;
+    border-radius: var(--radius); border: 1px solid var(--line);
+  }
+
   /* Inline SVG inside the filtered page comes through untouched in WebKit, so
      the Venn stayed crisp while the prose beside it went blocky. It gets its
      own filter, built only from primitives the device rendered correctly in
@@ -1778,19 +1790,10 @@ a.tag:hover { filter: brightness(.93); }
    ever has to sit outside the filtered element again. */
 :root[data-field="low"] .scan-frame { border-color: var(--blue); }
 
-/* ---- touch devices: the figure, not the instrument ---------
-   The interactive comparison is replaced by a still of it. Everything that
-   makes it interactive is also what stops the page filter working in WebKit,
-   and a phone gets less out of a draggable diagonal than a desktop does. */
+/* A still of the comparison, shown only in the one state that cannot render
+   the real thing: low field, in WebKit. The slider is draggable everywhere
+   else, phones included — nothing was ever wrong with it at high field. */
 .scan-static { display: none; }
-
-@media (hover: none) and (pointer: coarse) {
-  .scan-static {
-    display: block; width: 100%; max-width: 500px; height: auto;
-    border-radius: var(--radius); border: 1px solid var(--line);
-  }
-  .scan-body { display: none; }
-}
 @media (prefers-reduced-motion: reduce) {
   .field-grain { transition: none; }
 }

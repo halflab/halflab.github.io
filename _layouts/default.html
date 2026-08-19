@@ -335,16 +335,12 @@
         var low = d.getAttribute('data-field') === 'low'
                && d.getAttribute('data-sr') !== 'on';
 
-        /* The still of the scan comparison shown on touch devices has a
-           resampled twin, because on those devices the page filter cannot be
-           relied on to degrade it. Swap the file rather than filter it. */
+        /* The still of the scan comparison ships already resampled — see
+           _includes/scan_slider.html — so it must not be degraded twice. */
         var still = document.querySelector('.scan-static');
-        if (still && still.dataset.hi) {
-          still.src = low ? still.dataset.lo : still.dataset.hi;
-        }
 
         [].slice.call(document.images).forEach(function (img) {
-          if (img === still) return;      /* already handled, above */
+          if (img === still) return;
           if (low) degrade(img);
           else restore(img);
         });
