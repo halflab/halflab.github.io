@@ -654,7 +654,13 @@
     /* Every match, not the first: the offline preview holds all the pages in
        one document as several .page-main sections, and lensing only the first
        of them left the egg working on Home and nowhere else. */
-    var TARGETS = '.page-main > *:not(.wrap):not(.pub-filters), ' +
+    /* .scan-compare is deliberately not filtered by the stylesheet — doing so
+       blanks the whole page on iOS — but it joins in while the lens is up,
+       because its low-field rendering is a second set of images and no filter
+       can reconstruct those. The stylesheet puts the crisp sheets back for as
+       long as data-sr is on. */
+    var TARGETS = '.page-main > *:not(.wrap):not(.pub-filters):not(.hero), ' +
+                  '.hero-text, .hero-logo-band, .scan-compare, ' +
                   '.page-main > .page-head, .page-body > *:not(.pub-filters), ' +
                   '.site-footer, .brand';
     var SIDE = 150;      /* half the patch: the aperture is 300px square */

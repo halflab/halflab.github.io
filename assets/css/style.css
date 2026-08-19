@@ -980,8 +980,11 @@ a.tag:hover { filter: brightness(.93); }
   border-radius: 9px; background: #000;
   user-select: none; touch-action: pan-y;
 }
-/* Both layers are sprite sheets; background-size and position are set in JS. */
+/* Both layers are sprite sheets; background-size and position are set in JS.
+   Which sheet is showing is CSS's business: the crisp pair normally, the
+   pre-degraded pair in low-field mode. */
 .scan-img {
+  background-image: var(--scan-hi);
   position: absolute; inset: 0;
   background-repeat: no-repeat; background-color: #000;
 }
@@ -1699,9 +1702,25 @@ a.tag:hover { filter: brightness(.93); }
    Two selectors because there are two page shapes: Home puts its sections
    straight into #main, while every other page goes through the `page` layout,
    which wraps the content in .page-body. Splitting only at #main's children
-   would leave those pages with a single surface again — which is the case
-   that broke. */
-:root[data-field="low"] .page-main > *:not(.wrap):not(.pub-filters),
+   would leave those pages with a single surface again.
+
+   The hero is filtered through .hero-text rather than as a whole, which keeps
+   the scan comparison out of the filtered subtree. On iOS every filtered
+   element on the home page — down to the logo in the header — rendered for
+   under a second and then blanked, while other pages were fine. The scan
+   comparison is what Home has that they do not, and it holds three things
+   WebKit struggles to composite under an SVG filter: a clip-path (the only
+   one in the stylesheet), two 1500x1200 sprite sheets as backgrounds, and a
+   slider thumb 100vh tall. Taking the whole subtree out of the filter avoids
+   having to know which of the three it was.
+
+   It still degrades: tools/make_scans_lofi.py writes a resampled copy of each
+   sprite sheet, and the rule below swaps to them. Baked into the image rather
+   than applied at display time, which is both what actually happens to a scan
+   at low field and something no compositor can choke on. */
+:root[data-field="low"] .page-main > *:not(.wrap):not(.pub-filters):not(.hero),
+:root[data-field="low"] .hero-text,
+:root[data-field="low"] .hero-logo-band,
 :root[data-field="low"] .page-main > .page-head,
 :root[data-field="low"] .page-body > *:not(.pub-filters),
 :root[data-field="low"] .site-footer,
@@ -1725,6 +1744,23 @@ a.tag:hover { filter: brightness(.93); }
 <rect width='120' height='120' filter='url(%23n)' opacity='0.55'/></svg>");
 }
 :root[data-field="low"] .field-grain { opacity: .22; }
+
+/* The scan comparison swaps to the pre-degraded sprite sheets. This is the
+   one part of the page whose low-field rendering is a different file rather
+   than a filter — see the note above, and tools/make_scans_lofi.py. */
+:root[data-field="low"] .scan-img { background-image: var(--scan-lo); }
+:root[data-field="low"] .scan-frame { border-color: var(--blue); }
+
+/* Except while the super-resolution lens is up. A filter cannot undo a
+   degradation that is baked into a file, so the crisp sheets go back and the
+   script puts this figure under the lens filter with everything else — coarse
+   outside the patch, finer inside, the same as the rest of the page. The
+   filter is only on this subtree for as long as the lens is, which is why it
+   can be here at all: filtering it permanently is what blanked the page on
+   iOS, and the lens needs a keyboard to summon. */
+:root[data-field="low"][data-sr="on"] .scan-img {
+  background-image: var(--scan-hi);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .field-grain { transition: none; }

@@ -28,12 +28,27 @@
   <div class="scan-body">
    <div class="scan-frame" data-frame>
     <div class="scan-stage">
+      {% comment %}
+        Two files each, passed as custom properties rather than as a
+        background-image: the stylesheet swaps to the degraded pair in
+        low-field mode, and an inline background-image would outrank it.
+
+        The degraded sheets are made by tools/make_scans_lofi.py. The rest of
+        the page is resampled by an SVG filter at display time; this figure
+        cannot be, because filtering its subtree blanks the whole page on
+        iOS — so its degradation is baked into the images instead.
+      {% endcomment %}
+      {% assign under_lofi = s.under.image | split: '.' | first | append: '-lofi.jpg' %}
+      {% assign over_lofi  = s.over.image  | split: '.' | first | append: '-lofi.jpg' %}
+
       <div class="scan-img scan-under" data-under
-           style="background-image:url('{{ s.under.image | relative_url }}')"
+           style="--scan-hi:url('{{ s.under.image | relative_url }}');
+                  --scan-lo:url('{{ under_lofi | relative_url }}')"
            role="img" aria-label="{{ s.under.label }} scan"></div>
 
       <div class="scan-img scan-over" data-over
-           style="background-image:url('{{ s.over.image | relative_url }}')"
+           style="--scan-hi:url('{{ s.over.image | relative_url }}');
+                  --scan-lo:url('{{ over_lofi | relative_url }}')"
            role="img" aria-label="{{ s.over.label }} scan"></div>
 
       <div class="scan-divider" data-divider aria-hidden="true">
