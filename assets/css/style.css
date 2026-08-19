@@ -1750,6 +1750,26 @@ a.tag:hover { filter: brightness(.93); }
   :root[data-field="low"] .brand {
     filter: none;
   }
+
+  /* `background-clip: text` under a filter is the other construct WebKit
+     drops the layer over. The fallback colours were already declared for
+     browsers without background-clip; low-field mode brings them forward. At
+     4px blocks a gradient across four letters is mush anyway. */
+  :root[data-field="low"] .hero h1 .accent-red,
+  :root[data-field="low"] .hero h1 .accent-blue {
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    background-image: none;
+  }
+  :root[data-field="low"] .hero h1 .accent-red  { color: var(--red); }
+  :root[data-field="low"] .hero h1 .accent-blue { color: var(--blue); }
+
+  /* Inline SVG inside the filtered page comes through untouched in WebKit, so
+     the Venn stayed crisp while the prose beside it went blocky. It gets its
+     own filter, built only from primitives the device rendered correctly in
+     testing — dilate and a discrete transfer. Chunky and posterised rather
+     than pixelated, but visibly of a piece with the rest. */
+  :root[data-field="low"] .venn svg { filter: url(#lofi-svg); }
 }
 
 /* The scan comparison is inside #main, so the page filter degrades it along
@@ -1757,6 +1777,20 @@ a.tag:hover { filter: brightness(.93); }
    into a second pair of sprite sheets instead — needed only if this figure
    ever has to sit outside the filtered element again. */
 :root[data-field="low"] .scan-frame { border-color: var(--blue); }
+
+/* ---- touch devices: the figure, not the instrument ---------
+   The interactive comparison is replaced by a still of it. Everything that
+   makes it interactive is also what stops the page filter working in WebKit,
+   and a phone gets less out of a draggable diagonal than a desktop does. */
+.scan-static { display: none; }
+
+@media (hover: none) and (pointer: coarse) {
+  .scan-static {
+    display: block; width: 100%; max-width: 500px; height: auto;
+    border-radius: var(--radius); border: 1px solid var(--line);
+  }
+  .scan-body { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .field-grain { transition: none; }
 }

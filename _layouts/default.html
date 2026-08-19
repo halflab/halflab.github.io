@@ -88,6 +88,23 @@
       <feMorphology operator="dilate" radius="2"/>
     </filter>
 
+    {% comment %}
+      A degradation for inline SVG in WebKit, which leaves nested SVG
+      untouched when the page filter runs and drops the layer entirely on
+      anything containing feTile. Dilate and a discrete transfer were both
+      verified on the device: thicker strokes, quantised colour. Not the
+      same effect, but the same direction.
+    {% endcomment %}
+    <filter id="lofi-svg" x="-5%" y="-5%" width="110%" height="110%"
+            color-interpolation-filters="sRGB">
+      <feMorphology operator="dilate" radius="1.2"/>
+      <feComponentTransfer>
+        <feFuncR type="discrete" tableValues="0 .3 .58 .8 1"/>
+        <feFuncG type="discrete" tableValues="0 .3 .58 .8 1"/>
+        <feFuncB type="discrete" tableValues="0 .3 .58 .8 1"/>
+      </feComponentTransfer>
+    </filter>
+
     {% if site.interactive.sr_lens %}
     {% comment %}
       The same thing again, but with a patch under the pointer rendered by a
@@ -317,7 +334,17 @@
       function applyField() {
         var low = d.getAttribute('data-field') === 'low'
                && d.getAttribute('data-sr') !== 'on';
+
+        /* The still of the scan comparison shown on touch devices has a
+           resampled twin, because on those devices the page filter cannot be
+           relied on to degrade it. Swap the file rather than filter it. */
+        var still = document.querySelector('.scan-static');
+        if (still && still.dataset.hi) {
+          still.src = low ? still.dataset.lo : still.dataset.hi;
+        }
+
         [].slice.call(document.images).forEach(function (img) {
+          if (img === still) return;      /* already handled, above */
           if (low) degrade(img);
           else restore(img);
         });

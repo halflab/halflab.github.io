@@ -25,6 +25,20 @@
         data-cols="{{ sp.cols }}" data-rows="{{ sp.rows }}"
         data-slices="{{ sp.slices }}">
 
+  {% comment %}
+    Touch devices get this picture instead of the figure below: the same
+    comparison at the same diagonal, with no clip-path, no sprite sheets and
+    no slider. Those three are what WebKit refuses to composite under the
+    page filter, and they took the whole home page with them in low-field
+    mode. Two files, because a picture cannot be degraded by a filter that
+    will not run — tools/make_scan_static.py writes both.
+  {% endcomment %}
+  <img class="scan-static" alt="The same brain at 3 T and at 0.064 T"
+       src="{{ '/assets/img/scans/scan-static.jpg' | relative_url }}"
+       data-hi="{{ '/assets/img/scans/scan-static.jpg' | relative_url }}"
+       data-lo="{{ '/assets/img/scans/scan-static-lofi.jpg' | relative_url }}"
+       decoding="async">
+
   <div class="scan-body">
    <div class="scan-frame" data-frame>
     <div class="scan-stage">
