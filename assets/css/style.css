@@ -1747,25 +1747,63 @@ a.tag:hover { filter: brightness(.93); }
    that were resampled offline. Plus the grain over the top. */
 :root { --lofi-filter: url(#lofi); }
 
-@media (hover: none) and (pointer: coarse) {
-  :root {
-    --lofi-filter: contrast(.9) saturate(.72) brightness(1.03) blur(.35px);
-  }
-}
+
 
 /* Grain over the top of it, one fixed sheet. */
+:root {
+  --grain-img: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>\
+<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/>\
+<feColorMatrix type='saturate' values='0'/></filter>\
+<rect width='120' height='120' filter='url(%23n)' opacity='0.55'/></svg>");
+  --grid-line: rgba(255,255,255,.42);
+}
+:root[data-theme="dark"] { --grid-line: rgba(0,0,0,.5); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --grid-line: rgba(0,0,0,.5); }
+}
+
 .field-grain {
   position: fixed; inset: 0; pointer-events: none; z-index: 90;
   opacity: 0; transition: opacity .3s;
   mix-blend-mode: multiply;
   background-repeat: repeat;
-  background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>\
-<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/>\
-<feColorMatrix type='saturate' values='0'/></filter>\
-<rect width='120' height='120' filter='url(%23n)' opacity='0.55'/></svg>");
+  background-image: var(--grain-img);
 }
 :root[data-field="low"] .field-grain { opacity: .22; }
+
+/* -webkit-hyphens is a Safari-only property, so this block is "if WebKit".
+   Not a touch-device query: the fault is in the engine, not the form factor.
+   An iPad with a keyboard reports a fine pointer and would have kept the
+   broken version, and Safari on a Mac is the same engine again. */
+@supports (-webkit-hyphens: none) {
+  /* Blur to lose the fine detail, then a grid drawn over the top to put the
+     raster back. Not a true resample — the colours are not quantised — but at
+     a phone's pixel density it reads as one, and it is the only route to a
+     blocky page here: WebKit renders feTile as nothing on any element that
+     isn't extremely tall, and feTile is what makes the grid.
+
+     Tested on the device, on a page of eight variants: every chain containing
+     feTile came out blank, on short blocks and only on short blocks;
+     feMorphology, feComponentTransfer and feGaussianBlur all worked; and this
+     one worked. */
+  :root {
+    --lofi-filter: blur(1.15px) contrast(1.12) saturate(.78);
+  }
+
+  /* The same fixed sheet that carries the grain carries the grid. One layer
+     for the whole viewport, so the cost does not scale with the page. */
+  :root[data-field="low"] .field-grain {
+    opacity: 1;
+    /* multiply would erase the light grid lines against pale backgrounds */
+    mix-blend-mode: normal;
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
+      var(--grain-img);
+    background-size: 4px 4px, 4px 4px, 120px 120px;
+  }
+}
 
 /* The scan comparison swaps to the pre-degraded sprite sheets. This is the
    one part of the page whose low-field rendering is a different file rather
