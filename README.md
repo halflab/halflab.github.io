@@ -5,8 +5,6 @@ Neuroimaging) Laboratory, Department of Neuroimaging, King's College London.
 
 **Live at [halflab.github.io](https://halflab.github.io).**
 
-Jekyll, published by GitHub Pages. Push to `main` and it rebuilds.
-
 ---
 
 ## Editing the site
@@ -27,9 +25,8 @@ made in the browser: open the file on GitHub, click the pencil, commit.
 
 ### Team members
 
-Only `name` and `role` are required. Bios are reproduced as written — any
-length, first person or third. `name_native` adds a name in its original script
-alongside the Latin one.
+Only `name` and `role` are required. `name_native` adds a name in its original
+script alongside the Latin one.
 
 Photos are square JPEGs in `assets/img/team/`. To add one, put the original in
 `FV_resources/team/` and run:
@@ -62,7 +59,7 @@ Anything set by hand is left alone, and the previous version is kept as
 
 One Markdown file per post in `_news/`, named `YYYY-MM-DD-short-title.md`, with
 `title`, `date` and `summary` between `---` markers at the top. Posts appear in
-full on the News page and each also gets its own page.
+full on the News page.
 
 ---
 

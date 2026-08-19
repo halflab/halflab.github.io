@@ -1,0 +1,34 @@
+---
+layout: default
+---
+
+<div class="page-head">
+  <div class="wrap">
+    <p class="news-date">{{ page.date | date: "%-d %B %Y" }}</p>
+    <h1>{{ page.title }}</h1>
+  </div>
+</div>
+
+<div class="wrap page-body narrow">
+  {% if page.image %}
+    <img class="news-hero" src="{{ page.image | relative_url }}" alt="{{ page.image_alt | default: page.title }}" loading="lazy" decoding="async">
+  {% endif %}
+
+  {{ content }}
+
+  <p class="back-link"><a href="{{ '/news/' | relative_url }}">← All news</a></p>
+</div>
+
+{% comment %}
+  ---------------------------------------------------------------
+  Removed on 18 August 2026, when News posts stopped having pages
+  of their own — the News page shows each one in full, so a second
+  address for the same text was redundant.
+
+  To bring them back: move this file to _layouts/, and in
+  _config.yml set the news collection's `output: true` with
+  `permalink: /news/:year/:month/:title/`, add the `defaults` block
+  giving news the `news_item` layout, and make the headings in
+  news.html and index.html link to `item.url` again.
+  ---------------------------------------------------------------
+{% endcomment %}

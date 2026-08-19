@@ -107,7 +107,7 @@ title: Home
           {% for item in recent limit: 4 %}
             <li>
               <span class="d">{{ item.date | date: "%-d %b %Y" }}</span>
-              <a href="{{ item.url | relative_url }}">{{ item.title }}</a>
+              <a href="{{ '/news/' | relative_url }}">{{ item.title }}</a>
             </li>
           {% endfor %}
         </ul>

@@ -154,8 +154,22 @@ permalink: /team/
 
   <dialog class="lightbox" data-lightbox>
     <button class="lightbox-close" data-lb-close aria-label="Close">&times;</button>
-    <img data-lb-img alt="" loading="lazy" decoding="async">
-    <p class="lightbox-cap" data-lb-cap></p>
+    {% comment %}
+      The arrows are laid out beside the photo rather than on top of it, so
+      the picture is never covered — which is the whole point of opening it.
+    {% endcomment %}
+    <div class="lightbox-row">
+      <button class="lightbox-nav" data-lb-step="-1" aria-label="Previous photo">
+        <span aria-hidden="true">‹</span>
+      </button>
+      <div class="lightbox-fig">
+        <img data-lb-img alt="" loading="lazy" decoding="async">
+        <p class="lightbox-cap" data-lb-cap></p>
+      </div>
+      <button class="lightbox-nav" data-lb-step="1" aria-label="Next photo">
+        <span aria-hidden="true">›</span>
+      </button>
+    </div>
   </dialog>
 {% endif %}
 
@@ -196,15 +210,57 @@ permalink: /team/
     if (!lb) return;
     var img = lb.querySelector('[data-lb-img]');
     var cap = lb.querySelector('[data-lb-cap]');
-    document.querySelectorAll('.gallery-item').forEach(function (b) {
+    var items = [].slice.call(document.querySelectorAll('.gallery-item'));
+    if (!items.length) return;
+    var at = 0;
+
+    function show(i) {
+      /* Wraps: at the last photo, next goes back to the first. A dead arrow
+         is more annoying than a loop in a set this small. */
+      at = (i + items.length) % items.length;
+      var b = items[at];
+      img.src = b.dataset.full;
+      img.alt = b.dataset.caption || 'half lab';
+      cap.textContent = [b.dataset.caption, b.dataset.date]
+        .filter(Boolean).join(' · ');
+      /* Move the strip underneath as well, so closing the lightbox leaves
+         you looking at the photo you were just on. */
+      b.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+
+    items.forEach(function (b, i) {
       b.addEventListener('click', function () {
-        img.src = b.dataset.full;
-        img.alt = b.dataset.caption || 'half lab';
-        cap.textContent = [b.dataset.caption, b.dataset.date]
-          .filter(Boolean).join(' · ');
+        show(i);
         if (lb.showModal) lb.showModal();
       });
     });
+
+    lb.querySelectorAll('[data-lb-step]').forEach(function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();               /* not a click on the backdrop */
+        /* dataset key for data-lb-step is lbStep, not step — reading the
+           wrong one gave NaN, and every arrow click threw. */
+        show(at + parseInt(btn.dataset.lbStep, 10));
+      });
+    });
+
+    lb.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowRight') { ev.preventDefault(); show(at + 1); }
+      if (ev.key === 'ArrowLeft')  { ev.preventDefault(); show(at - 1); }
+    });
+
+    /* Swipe, for the same gesture people already use in a photo app. */
+    var x0 = null;
+    lb.addEventListener('touchstart', function (ev) {
+      x0 = ev.touches[0].clientX;
+    }, { passive: true });
+    lb.addEventListener('touchend', function (ev) {
+      if (x0 === null) return;
+      var dx = ev.changedTouches[0].clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 45) show(at + (dx < 0 ? 1 : -1));
+    });
+
     lb.querySelector('[data-lb-close]').addEventListener('click', function () { lb.close(); });
     lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
   })();

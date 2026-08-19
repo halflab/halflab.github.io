@@ -15,10 +15,9 @@ permalink: /news/
           {% comment %}
             The whole post, not a summary: there are few enough of these that
             making someone click through to read three sentences — and click
-            back — is worse than simply showing them. The post keeps its own
-            page for linking to; the heading is that link.
+            back — is worse than simply showing them.
           {% endcomment %}
-          <h2 class="news-title"><a href="{{ item.url | relative_url }}">{{ item.title }}</a></h2>
+          <h2 class="news-title">{{ item.title }}</h2>
           {% if item.image %}
             <img class="news-hero" src="{{ item.image | relative_url }}"
                  alt="{{ item.image_alt | default: item.title }}"

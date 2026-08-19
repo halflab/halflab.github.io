@@ -70,18 +70,10 @@ url: "https://halflab.github.io"
 # Plugins. All three are on GitHub Pages' allow-list, so they run on the
 # live site without a build step of your own:
 #   sitemap  — /sitemap.xml, so search engines can find every page
-#   feed     — /feed.xml, an RSS feed of News
 #   seo-tag  — canonical links and richer social previews
 plugins:
   - jekyll-sitemap
-  - jekyll-feed
   - jekyll-seo-tag
-
-feed:
-  path: feed.xml
-  collections:
-    news:
-      path: feed.xml
 
 # Institution / affiliation — shown in footer and Home page
 institution: King's College London
@@ -133,15 +125,9 @@ permalink: /news/:year/:month/:title/
 
 collections:
   news:
-    output: true
-    permalink: /news/:year/:month/:title/
-
-defaults:
-  - scope:
-      path: ""
-      type: news
-    values:
-      layout: news_item
+    # No page of its own per post: the News page carries each one in full,
+    # so a separate page would be the same text at a second address.
+    output: false
 
 sass:
   style: compressed

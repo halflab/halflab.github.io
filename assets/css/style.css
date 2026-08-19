@@ -678,6 +678,32 @@ code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-si
   text-shadow: 0 1px 4px rgba(0,0,0,.8);
 }
 
+/* Photo and arrows in one row, so the arrows sit beside the picture instead
+   of covering it. The figure takes the remaining width; min-width:0 is what
+   lets it shrink rather than pushing the arrows off the edge. */
+.lightbox-row {
+  display: flex; align-items: center; gap: .9rem;
+}
+.lightbox-fig { flex: 1 1 auto; min-width: 0; }
+.lightbox-nav {
+  flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%;
+  cursor: pointer; padding: 0 0 .12em;
+  display: grid; place-items: center;
+  font-size: 1.7rem; line-height: 1;
+  color: #fff; background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.35);
+  transition: background .15s, border-color .15s;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,.2); border-color: #fff; }
+.lightbox-nav:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+@media (max-width: 620px) {
+  /* Every pixel the arrows take is a pixel off the photo, and on a phone
+     the swipe does the same job. */
+  .lightbox-row { gap: .45rem; }
+  .lightbox-nav { width: 34px; height: 34px; font-size: 1.3rem; }
+}
+
 .contact-line { margin-bottom: 0; }
 .contact-line a { font-weight: 600; }
 
