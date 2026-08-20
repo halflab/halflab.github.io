@@ -1,6 +1,6 @@
 ---
 title: "The lab has a website"
-date: 2026-08-13
+date: 2026-08-19
 summary: "The half lab site is online."
 ---
 
