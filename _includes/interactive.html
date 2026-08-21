@@ -542,9 +542,13 @@
       pubs.forEach(function (p) {
         var tags = (p.dataset.tags || '').split(' ').filter(Boolean);
         /* With nothing picked, everything shows — including the handful of
-           papers that belong to no strand. With a strand picked, a paper
-           needs at least one of the chosen ones. */
-        var byStrand = !picked.length || picked.some(function (k) {
+           papers that belong to no strand. With strands picked, a paper has
+           to carry all of them: picking two strands asks for the work that
+           is both, which is the reading that narrows, and narrowing is what
+           a filter is for. Some pairs have no papers at all — low field and
+           brain networks, as things stand — and an empty list there is the
+           right answer rather than a fault. */
+        var byStrand = !picked.length || picked.every(function (k) {
           return tags.indexOf(k) > -1;
         });
         var byAuthor = !wanted || (p.dataset.find || '').indexOf(wanted) > -1;
@@ -676,6 +680,20 @@
     var px = window.innerWidth / 2, py = window.innerHeight / 2;
 
     function lowField() { return doc.getAttribute('data-field') === 'low'; }
+
+    /* The lens survives moving between pages. Each page is a new document, so
+       it has to be remembered somewhere: sessionStorage rather than
+       localStorage, because it should last as long as the visit and not
+       longer — an easter egg reappearing next week would be a puzzle rather
+       than a joke. Wrapped, because storage throws in private browsing. */
+    var KEY = 'halflab-sr';
+    function remember(v) {
+      try { v ? sessionStorage.setItem(KEY, '1') : sessionStorage.removeItem(KEY); }
+      catch (e) {}
+    }
+    function remembered() {
+      try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; }
+    }
 
     /* ---- the graphic --------------------------------------------------
        A rounded aperture with a different architecture on each side, all
@@ -885,6 +903,7 @@
     function start() {
       if (on || !lowField()) return;
       on = true;
+      remember(true);
 
       /* Photographs are resampled onto a canvas in low-field mode, and no
          filter can undo that — inside the lens they would be the one thing
@@ -944,6 +963,7 @@
       });
       lens = note = null;
       typed = '';
+      remember(false);
 
       doc.removeAttribute('data-sr');
       if (window.halflabField) window.halflabField.applyImages();
@@ -961,6 +981,14 @@
         if (typed.slice(-WORDS[i].length) === WORDS[i]) { start(); return; }
       }
     });
+
+    /* Carried over from the previous page. The note is not shown again — it
+       has already been read once, and repeating it on every page turn would
+       nag. */
+    if (remembered() && lowField()) {
+      start();
+      if (note && note.parentNode) { note.parentNode.removeChild(note); note = null; }
+    }
 
     /* Switching back to high field takes the lens with it: there is nothing
        left for it to do, and the filters it installed would keep the page
