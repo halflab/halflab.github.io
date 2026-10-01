@@ -57,5 +57,12 @@ echo "     (System Settings > Privacy & Security > Local Network)"
 echo "   - a VPN on either device will usually break this."
 echo
 
+echo "  What to check: switch to low field (the h|l button), then"
+echo "  Home, Research and Publications should all be pixelated,"
+echo "  nothing blank. Safari on this Mac opens too, for the same check."
+echo
+
 cd "$DIR" || exit 1
+# Safari on the Mac as well, a second after the server is up.
+(sleep 1; open -a Safari "http://localhost:$PORT/") &
 python3 -m http.server "$PORT"

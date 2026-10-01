@@ -1,6 +1,7 @@
 ---
 # No layout: this page is deliberately standalone, so that nothing on it is
-# shared with the site and each variant is isolated.
+# shared with the site and each box is isolated. Not linked from anywhere;
+# delete it once low-field mode is confirmed on the phone.
 layout: null
 permalink: /field-test.html
 sitemap: false
@@ -17,142 +18,87 @@ sitemap: false
          padding: 1rem; color: #232326; background: #fff; }
   h1 { font-size: 1.15rem; margin: 0 0 .3rem; }
   p.note { color: #6b6d70; font-size: .88rem; margin: 0 0 1.2rem; }
-  .tile { border: 1px solid #e4e0dd; border-radius: 10px; padding: .7rem .8rem;
-          margin-bottom: .9rem; }
+  .row { display: flex; flex-wrap: wrap; gap: .9rem; margin-bottom: .9rem; }
+  .tile { width: 250px; }
   .tile h2 { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
-             color: #a9351f; margin: 0 0 .5rem; font-weight: 700; }
-  .sample { font-family: Georgia, serif; }
-  .sample .big { font-size: 1.6rem; font-weight: 700; display: block; }
-  .sample img { width: 120px; height: auto; border-radius: 4px; margin-top: .4rem;
-                display: block; }
-  .tall { height: 2600px; background: linear-gradient(#fff, #f2efec); }
-  .tall .sample { position: sticky; top: 0; }
-  /* G: no SVG anywhere — blur plus a grid, to fake a raster */
-  .css-grid { position: relative; filter: blur(1.1px) contrast(1.15); }
-  .css-grid::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background-image:
-      linear-gradient(to right, rgba(255,255,255,.55) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,.55) 1px, transparent 1px);
-    background-size: 4px 4px;
-  }
+             color: #a9351f; margin: 0 0 .4rem; font-weight: 700; }
+  .card { border: 1px solid #e4e0dd; border-radius: 10px; padding: .6rem .7rem;
+          background: #fff; }
+  .card .big { font-size: 1.5rem; font-weight: 700; display: block; line-height: 1.2;
+               background: linear-gradient(90deg, #cf4832, #1e73a6);
+               -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .card img { width: 64px; height: 64px; border-radius: 6px; float: right; margin-left: .4rem; }
+  .card svg { display: block; width: 100%; height: 44px; }
+  .sticky { position: sticky; top: 0; z-index: 2; }
+  .tall { border: 1px solid #e4e0dd; border-radius: 10px;
+          background: repeating-linear-gradient(#fff 0 40px, #f2efec 40px 80px); }
+  .tall p { margin: .6rem .7rem; font-size: 1.2rem; font-weight: 700; }
 </style>
+</head>
+<body>
 
-<!-- shared definitions, exactly as the site has them -->
-<svg class="defs" width="1" height="1" aria-hidden="true"
-     style="position:absolute;left:-9999px;top:0;overflow:hidden">
-  <filter id="t-full" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+<svg width="1" height="1" aria-hidden="true" style="position:absolute;left:-9999px;top:0;overflow:hidden">
+  <!-- #lofi on the site: what Chrome and Firefox use -->
+  <filter id="pinned" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
     <feFlood x="1" y="1" width="1" height="1"/>
     <feComposite width="4" height="4"/>
     <feTile result="tiles"/>
     <feComposite in="SourceGraphic" in2="tiles" operator="in"/>
     <feMorphology operator="dilate" radius="2"/>
   </filter>
-  <filter id="t-notile" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feMorphology in="SourceGraphic" operator="dilate" radius="1.5"/>
-  </filter>
-  <filter id="t-post" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feComponentTransfer>
-      <feFuncR type="discrete" tableValues="0 .35 .7 1"/>
-      <feFuncG type="discrete" tableValues="0 .35 .7 1"/>
-      <feFuncB type="discrete" tableValues="0 .35 .7 1"/>
-    </feComponentTransfer>
-  </filter>
-  <filter id="t-blur" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feGaussianBlur stdDeviation="1"/>
-  </filter>
-  <filter id="t-nomorph" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-    <feFlood x="1" y="1" width="1" height="1"/>
-    <feComposite width="4" height="4"/>
+  <!-- #lofi-anchored on the site: what Safari uses -->
+  <filter id="anchored" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feFlood width="1" height="1"/>
+    <feOffset dx="1" dy="1" width="4" height="4"/>
     <feTile result="tiles"/>
     <feComposite in="SourceGraphic" in2="tiles" operator="in"/>
+    <feMorphology operator="dilate" radius="2"/>
   </filter>
 </svg>
-</head>
-<body>
 
 <h1>Low-field rendering test</h1>
-<p class="note">
-  Eight ways of degrading the same block. For each, note one of:
-  <strong>pixelated</strong> (blocky letters), <strong>other effect</strong>
-  (changed but not blocky), <strong>nothing</strong>, or <strong>blank</strong>.
-</p>
+<p class="note" id="info"></p>
 
-<div class="tile">
-  <h2>A · full chain, shared defs</h2>
-  <div class="sample" style="filter:url(#t-full)">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
+<template id="sample">
+  <div class="card">
     <img src="{{ '/assets/img/team/frantisek.jpg' | relative_url }}" alt="">
+    <span class="big">half lab</span>
+    Portable scanners, 64&nbsp;mT.
+    <svg viewBox="0 0 250 44"><circle cx="105" cy="22" r="19" fill="none" stroke="#cf4832" stroke-width="2.5"/><circle cx="135" cy="22" r="19" fill="none" stroke="#1e73a6" stroke-width="2.5"/></svg>
   </div>
+</template>
+
+<div class="row">
+  <div class="tile"><h2>A · no filter</h2><div data-f=""></div></div>
+  <div class="tile"><h2>B · Chrome's filter</h2><div data-f="pinned"></div></div>
+  <div class="tile"><h2>C · Safari's filter</h2><div data-f="anchored"></div></div>
+  <div class="tile"><h2>D · Safari's filter, sticky</h2><div data-f="anchored" class="sticky"></div></div>
 </div>
 
-<div class="tile">
-  <h2>B · full chain, defs in the same block</h2>
-  <svg width="1" height="1" style="position:absolute;left:-9999px">
-    <filter id="t-local" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feFlood x="1" y="1" width="1" height="1"/>
-      <feComposite width="4" height="4"/>
-      <feTile result="tiles"/>
-      <feComposite in="SourceGraphic" in2="tiles" operator="in"/>
-      <feMorphology operator="dilate" radius="2"/>
-    </filter>
-  </svg>
-  <div class="sample" style="filter:url(#t-local)">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
-  </div>
+<div class="row">
+  <div class="tile"><h2>E · Safari's filter, too big</h2>
+    <div class="tall" id="tall" style="filter:url(#anchored)"><p>E</p></div></div>
 </div>
 
-<div class="tile">
-  <h2>C · tile, no feMorphology</h2>
-  <div class="sample" style="filter:url(#t-nomorph)">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
-  </div>
-</div>
-
-<div class="tile">
-  <h2>D · feMorphology only, no tile</h2>
-  <div class="sample" style="filter:url(#t-notile)">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
-  </div>
-</div>
-
-<div class="tile">
-  <h2>E · posterise only</h2>
-  <div class="sample" style="filter:url(#t-post)">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
-  </div>
-</div>
-
-<div class="tile">
-  <h2>F · gaussian blur only</h2>
-  <div class="sample" style="filter:url(#t-blur)">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
-  </div>
-</div>
-
-<div class="tile">
-  <h2>G · no SVG at all: css blur plus a grid</h2>
-  <div class="sample css-grid">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT.
-    <img src="{{ '/assets/img/team/levente.jpg' | relative_url }}" alt="">
-  </div>
-</div>
-
-<div class="tile tall">
-  <h2>H · full chain on a very tall block (scroll it)</h2>
-  <div class="sample" style="filter:url(#t-full);height:2500px">
-    <span class="big">High and Low Field</span>
-    Portable scanners, 64 mT. This block is 2500px tall — if the others work
-    and this one does not, the problem is the size of the filtered surface.
-  </div>
-</div>
-
+<script>
+  document.querySelectorAll('[data-f]').forEach(function (slot) {
+    slot.appendChild(document.getElementById('sample').content.cloneNode(true));
+    var card = slot.querySelector('.card');
+    if (slot.dataset.f) card.style.filter = 'url(#' + slot.dataset.f + ')';
+    if (slot.classList.contains('sticky')) {
+      slot.classList.remove('sticky');
+      card.classList.add('sticky');
+    }
+  });
+  /* A block well past 4096 × 4096 device pixels, the size at which recent
+     WebKit stops painting a filter. */
+  var dpr = window.devicePixelRatio || 1;
+  var tall = document.getElementById('tall');
+  tall.style.height = Math.round(1.4 * 4096 * 4096 / (dpr * dpr) / 250) + 'px';
+  document.getElementById('info').textContent =
+    'Expected in Safari: A sharp; B blank; C and D blocky; E blank in recent ' +
+    'versions. Expected in Chrome: A sharp; B, C, D and E blocky. ' +
+    '(dpr ' + dpr + ')';
+</script>
 </body>
 </html>

@@ -654,17 +654,13 @@
     var template = document.getElementById('lofi-lens');
     if (!template) return;
 
-    /* Not in WebKit. The lens filters a patch of the page through the same
-       feTile chain the rest of low-field mode uses, and WebKit renders feTile
-       as nothing on any element that is not very tall — so the lens would
-       blank whatever it touched. Nothing is lost on a phone, which has no
-       keyboard to type the word with; on a Mac, Safari misses out.
-
-       -webkit-hyphens is a Safari-only property, which is the least
-       unreliable way to ask "is this WebKit" from script. */
-    if (window.CSS && CSS.supports && CSS.supports('-webkit-hyphens', 'none')) {
-      return;
-    }
+    /* Not in WebKit (html.lofi-split, set in the layout's head). The lens
+       places its patch in absolute coordinates, which WebKit measures from
+       a different origin, and it filters #main in one piece, which WebKit
+       cannot do on a long page — see the layout. Nothing is lost on a phone,
+       which has no keyboard to type the word with; on a Mac, Safari misses
+       out. */
+    if (doc.classList.contains('lofi-split')) return;
 
     var WORDS = ['gambas', 'sr', 'iqt'];
     /* Every match, not the first: the offline preview holds all the pages in

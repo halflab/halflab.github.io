@@ -1680,58 +1680,38 @@ a.tag:hover { filter: brightness(.93); }
 }
 
 /* The page itself is resampled, not just the pictures: #main and the footer
-   run through the SVG filter above, so headings, the year bar and the body
-   text all go blocky. The header is left alone — the switch that turns this
-   off has to stay legible, and filtering a sticky element breaks the sticky.
+   run through the SVG filter in _layouts/default.html, so headings, the year
+   bar and the body text all go blocky. The header is left alone — the switch
+   that turns this off has to stay legible.
 
    Text is smaller than the tiles, so it degrades further than the images do;
-   that is the honest direction, but it is why the tile is only 3px.
+   that is the honest direction, but it is why the tile is only 4px.
 
-   #main is filtered whole, deliberately, and not block by block. WebKit
-   renders feTile as nothing at all on a short element — tested on the device
-   across eight variants — and feTile is what draws the grid. A page's #main
-   is thousands of pixels tall and lands on the working side of that; its
-   individual sections do not. */
-:root[data-field="low"] .page-main,
-:root[data-field="low"] .site-footer,
+   Chrome and Firefox filter #main in one piece. WebKit (html.lofi-split)
+   gets the same resample on a set of smaller blocks instead, which the
+   script in the layout marks with data-lofi, and through #lofi-anchored
+   rather than #lofi — the reasons for both are written up in the layout. The
+   result looks the same; only where the filter sits is different. */
+:root[data-field="low"]:not(.lofi-split) .page-main,
+:root[data-field="low"]:not(.lofi-split) .site-footer,
 /* The mark in the corner too — it is the first thing anyone looks at, and
    leaving it crisp made the effect look like a rendering fault rather than
    a choice. Filtering the link, not the header, keeps the header sticky. */
-:root[data-field="low"] .brand {
-  filter: var(--lofi-filter);
+:root[data-field="low"]:not(.lofi-split) .brand {
+  filter: url(#lofi);
 }
-
-/* ---- what "degraded" means, per device ---------------------
-   Desktop gets the SVG filter above: a real resample, text included.
-
-   Touch devices get plain CSS filter functions instead. Three rounds of
-   trying to make the SVG filter behave on iOS ended with pages that rendered
-   for half a second and then went blank, taking every other filtered element
-   with them — a compositing failure somewhere in WebKit that I could not
-   reproduce or narrow down remotely. Colour-space functions cannot fail that
-   way: they are per-pixel arithmetic with no sampling and no filter region.
-
-   Phones lose the pixelated *text*. They keep everything that is real
-   resampling rather than a display effect: the photographs, which are
-   redrawn through a canvas, and the scan comparison, which swaps to sheets
-   that were resampled offline. Plus the grain over the top. */
-:root { --lofi-filter: url(#lofi); }
-
-
+:root[data-field="low"].lofi-split [data-lofi],
+:root[data-field="low"].lofi-split .brand {
+  filter: url(#lofi-anchored);
+}
 
 /* Grain over the top of it, one fixed sheet. */
 :root {
-  --grid-line: rgba(255,255,255,.5);
   --grain-img: url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>\
 <filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/>\
 <feColorMatrix type='saturate' values='0'/></filter>\
 <rect width='120' height='120' filter='url(%23n)' opacity='0.55'/></svg>");
-}
-
-:root[data-theme="dark"] { --grid-line: rgba(0,0,0,.55); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --grid-line: rgba(0,0,0,.55); }
 }
 
 .field-grain {
@@ -1743,47 +1723,12 @@ a.tag:hover { filter: brightness(.93); }
 }
 :root[data-field="low"] .field-grain { opacity: .22; }
 
-/* -webkit-hyphens is Safari-only, so this block is "if WebKit".
-
-   WebKit gets no SVG filter on the page at all. Not because every SVG filter
-   fails there — feMorphology, feComponentTransfer and feGaussianBlur were all
-   verified working on the device — but because feTile, the primitive that
-   draws the pixel grid, renders as nothing on anything but a very tall
-   element, and chasing which page happened to satisfy that cost days and left
-   the site broken in between. CSS filter functions plus a grid overlay ask
-   nothing of the compositor and cannot fail this way.
-
-   Everything else on the page is left exactly alone here: the scan slider
-   stays draggable, the Venn stays interactive, no element is hidden or
-   swapped. Fewer moving parts is the point. */
-@supports (-webkit-hyphens: none) {
-  :root {
-    --lofi-filter: blur(1.3px) contrast(1.22) saturate(.76);
-  }
-
-  /* The grid that puts the raster back, on the sheet that already carries
-     the grain — one fixed layer for the whole viewport. */
-  :root[data-field="low"] .field-grain {
-    opacity: 1;
-    mix-blend-mode: normal;      /* multiply would erase pale grid lines */
-    background-image:
-      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
-      var(--grain-img);
-    background-size: 4px 4px, 4px 4px, 120px 120px;
-  }
-}
-
 /* The scan comparison is inside #main, so the page filter degrades it along
    with everything else. tools/make_scans_lofi.py can bake the degradation
    into a second pair of sprite sheets instead — needed only if this figure
    ever has to sit outside the filtered element again. */
 :root[data-field="low"] .scan-frame { border-color: var(--blue); }
 
-/* Not used at present — the slider renders everywhere. Kept because
-   tools/make_scan_static.py still writes the file, and because a still is the
-   obvious fallback if the figure ever has to stand down again. */
-.scan-static { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .field-grain { transition: none; }
 }

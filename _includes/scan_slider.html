@@ -25,20 +25,6 @@
         data-cols="{{ sp.cols }}" data-rows="{{ sp.rows }}"
         data-slices="{{ sp.slices }}">
 
-  {% comment %}
-    A still of the comparison, for low-field mode in WebKit only — the one
-    combination where the real figure cannot be drawn, because its clip-path,
-    sprite sheets and 100vh slider thumb are what stop the page filter
-    compositing. Everywhere else, and at high field everywhere including
-    phones, the draggable figure below is what shows.
-
-    Already resampled, since the filter that would have degraded it is the
-    one that will not run. Written by tools/make_scan_static.py.
-  {% endcomment %}
-  <img class="scan-static" alt="The same brain at 3 T and at 0.064 T"
-       src="{{ '/assets/img/scans/scan-static-lofi.jpg' | relative_url }}"
-       loading="lazy" decoding="async">
-
   <div class="scan-body">
    <div class="scan-frame" data-frame>
     <div class="scan-stage">

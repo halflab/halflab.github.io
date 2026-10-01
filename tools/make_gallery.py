@@ -109,6 +109,31 @@ def _im(prog, src, dst, long_edge, quality):
         raise RuntimeError("no output")
 
 
+def _upright(path, quality):
+    """Bake EXIF rotation into the pixels and drop the tag.
+
+    ImageMagick is told to `-auto-orient` and `-strip`, so anything it touches
+    comes out upright with no metadata. `sips` does neither: it passes the
+    orientation tag through, and a photo taken with the phone upside down
+    stays upside down in the file, relying on the reader to rotate it.
+    Browsers do; plenty of other things do not, and mixing the two
+    conventions inside one gallery is asking for trouble. Needs Pillow, which
+    the other two tools in here already require; silently skipped without it.
+    """
+    try:
+        from PIL import Image, ImageOps
+    except ImportError:
+        return
+    try:
+        im = Image.open(path)
+        if im.getexif().get(274, 1) == 1:
+            return
+        ImageOps.exif_transpose(im).save(
+            path, "JPEG", quality=quality, optimize=True, progressive=True)
+    except Exception:
+        pass
+
+
 def render(src, dst, long_edge, quality, tools):
     """Try each decoder until one produces a usable file."""
     errors = []
@@ -121,6 +146,7 @@ def render(src, dst, long_edge, quality, tools):
                     check=True, capture_output=True, timeout=240)
                 if os.path.getsize(dst) == 0:
                     raise RuntimeError("empty")
+                _upright(dst, quality)
             elif prog == "heif-convert":
                 tmp = dst + ".tmp.png"
                 subprocess.run(["heif-convert", src, tmp],

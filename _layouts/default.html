@@ -28,6 +28,10 @@
       } catch (e) {}
       var q = new URLSearchParams(window.location.search).get('field');
       if (q !== null && parseFloat(q) > 0) d.setAttribute('data-field', 'low');
+      /* WebKit — Safari, and every browser on iOS — applies the low-field
+         filter block by block rather than to the whole page. Set here, before
+         the first paint, so it never tries the whole page first. */
+      if (/Apple/.test(navigator.vendor || '')) d.classList.add('lofi-split');
     })();
   </script>
 
@@ -72,6 +76,24 @@
     The tile is 4px: coarse enough to read as resampling, fine enough
     to leave body text legible.
     Bumping `radius` and the flood rectangle together makes it coarser.
+
+    Two copies, because the engines disagree about where (1,1) is.
+
+    #lofi, for Chrome and Firefox, pins the dot at x="1" y="1". Those
+    browsers measure that from the filtered element's own corner, as the
+    spec says.
+
+    #lofi-anchored, for WebKit, has no x or y anywhere. WebKit measures x
+    and y from the corner of the layer the element is painted into — usually
+    the whole page — so a dot at (1,1) lands outside almost every element,
+    the chain comes out empty and Safari paints the element as nothing. That
+    was the blank page. Left unset, the flood starts at the corner of the
+    filter region instead, which WebKit puts on a whole pixel, and feOffset
+    moves it to (1,1) inside its tile. Same grid, same look.
+
+    Why not one copy: tried in Chrome on #main, the anchored version drew
+    uneven rows — its tiles stopped lining up every four pixels down the
+    page — where the pinned one has always been exact.
   {% endcomment %}
   {% comment %}
     Not width="0" height="0": Safari has been known to drop filters defined in
@@ -88,21 +110,13 @@
       <feMorphology operator="dilate" radius="2"/>
     </filter>
 
-    {% comment %}
-      A degradation for inline SVG in WebKit, which leaves nested SVG
-      untouched when the page filter runs and drops the layer entirely on
-      anything containing feTile. Dilate and a discrete transfer were both
-      verified on the device: thicker strokes, quantised colour. Not the
-      same effect, but the same direction.
-    {% endcomment %}
-    <filter id="lofi-svg" x="-5%" y="-5%" width="110%" height="110%"
+    <filter id="lofi-anchored" x="0" y="0" width="100%" height="100%"
             color-interpolation-filters="sRGB">
-      <feMorphology operator="dilate" radius="1.2"/>
-      <feComponentTransfer>
-        <feFuncR type="discrete" tableValues="0 .3 .58 .8 1"/>
-        <feFuncG type="discrete" tableValues="0 .3 .58 .8 1"/>
-        <feFuncB type="discrete" tableValues="0 .3 .58 .8 1"/>
-      </feComponentTransfer>
+      <feFlood width="1" height="1"/>
+      <feOffset dx="1" dy="1" width="4" height="4"/>
+      <feTile result="tiles"/>
+      <feComposite in="SourceGraphic" in2="tiles" operator="in"/>
+      <feMorphology operator="dilate" radius="2"/>
     </filter>
 
     {% if site.interactive.sr_lens %}
@@ -128,6 +142,10 @@
       logo and the footer — 40px and 120px tall — had no patch at all and
       never lensed. The blur's subregion is clamped to the element for the
       same reason, and to keep its cost independent of the page's height.
+
+      Chrome and Firefox only. These are absolute coordinates, which WebKit
+      reads differently (see the note above #lofi), so the lens stays off
+      in Safari.
     {% endcomment %}
     <filter id="lofi-lens" x="0" y="0" width="100%" height="100%"
             color-interpolation-filters="sRGB">
@@ -331,16 +349,141 @@
         }
       }, true);
 
+      /* ---- WebKit: the filter goes on block by block -----------------
+         Chrome and Firefox run the whole of #main through one filter.
+         WebKit cannot, for two reasons that come from how it paints them:
+
+         - Every step from feTile on is allocated at the size of the whole
+           filtered element, and past 4096 × 4096 device pixels WebKit gives
+           up and paints nothing. A long page's #main is several times that
+           on a phone. It also refilters the whole element for every tile of
+           the screen the element touches, so big is slow as well as fragile.
+         - Anything it puts on a layer of its own — here, sticky elements:
+           the Venn on a phone, the year bar on Publications — is painted
+           outside its ancestors' filters and has to carry its own.
+
+         So on <html class="lofi-split"> this marks the largest blocks under
+         a size budget, walking down from #main and the footer, plus every
+         sticky element; the stylesheet filters whatever carries data-lofi.
+         Nothing visible changes except where the filter sits. */
+      var splitting = d.classList.contains('lofi-split');
+      var split = [];
+      var ROOTS = ['.page-main', '.site-footer'];
+
+      function lofiBlocks() {
+        var s = (window.devicePixelRatio || 1) *
+                ((window.visualViewport && window.visualViewport.scale) || 1);
+        /* Budgets in CSS px², per block. The soft one keeps a block cheap to
+           refilter; the hard one stays well clear of where WebKit gives up,
+           and is only used for blocks that cannot be divided, or that would
+           lose a background or border of their own if they were. */
+        var soft = 2.5e6 / (s * s);
+        var hard = 0.6 * 4096 * 4096 / (s * s);
+        var out = [];
+
+        function area(el) {
+          var r = el.getBoundingClientRect();
+          return r.width * r.height;
+        }
+        function hasText(el) {
+          for (var n = el.firstChild; n; n = n.nextSibling) {
+            if (n.nodeType === 3 && /\S/.test(n.data)) return true;
+          }
+          return false;
+        }
+        function isInline(el) {
+          return getComputedStyle(el).display.indexOf('inline') === 0;
+        }
+        /* A background, border or shadow of its own: splitting the element
+           would leave that sharp, since only its children get filtered. */
+        function paints(el) {
+          var cs = getComputedStyle(el);
+          return cs.backgroundImage !== 'none' ||
+                 !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor) ||
+                 cs.boxShadow !== 'none' ||
+                 ['Top', 'Right', 'Bottom', 'Left'].some(function (s) {
+                   return parseFloat(cs['border' + s + 'Width']) > 0 &&
+                          cs['border' + s + 'Style'] !== 'none';
+                 });
+        }
+        function visit(el) {
+          /* Dialogs open in the top layer, clear of any filter, as they do
+             in Chrome. Images are already resampled by degrade() above. */
+          if (/^(DIALOG|SCRIPT|STYLE|TEMPLATE|IMG|PICTURE)$/.test(el.tagName)) return;
+          var a = area(el);
+          var kids = [].slice.call(el.children);
+          if (a && a <= soft) { out.push(el); return; }
+          /* Text or inline elements directly inside — a paragraph or
+             similar — cannot be divided at all. */
+          var solid = !kids.length || hasText(el) || kids.some(isInline);
+          /* Over the soft budget, taken whole anyway if it is solid or has
+             paint of its own, as long as it stays under the hard one. */
+          if (a && a <= hard && (solid || paints(el))) { out.push(el); return; }
+          /* Past the hard budget and indivisible: left sharp rather than
+             blank. Nothing on the site is that big. */
+          if (solid) return;
+          kids.forEach(visit);
+        }
+
+        ROOTS.forEach(function (sel) {
+          var root = document.querySelector(sel);
+          if (!root) return;
+          visit(root);
+          [].forEach.call(root.querySelectorAll('*'), function (el) {
+            var p = getComputedStyle(el).position;
+            if ((p === 'sticky' || p === 'fixed') && out.indexOf(el) < 0) {
+              var a = area(el);
+              if (a && a <= hard) out.push(el);
+            }
+          });
+        });
+        return out;
+      }
+
+      function applySplit() {
+        var next = splitting && d.getAttribute('data-field') === 'low'
+                 ? lofiBlocks() : [];
+        split.forEach(function (el) {
+          if (next.indexOf(el) < 0) el.removeAttribute('data-lofi');
+        });
+        next.forEach(function (el) {
+          if (!el.hasAttribute('data-lofi')) el.setAttribute('data-lofi', '');
+        });
+        split = next;
+      }
+
+      /* Anything that changes the layout changes which blocks fit: a resize,
+         the phone turning, a pinch zoom, web fonts arriving, images loading,
+         or content opening and closing (the strand filter on Publications,
+         the dataset entries). All of those move the size of #main. */
+      var splitTimer = 0;
+      function resplit() {
+        clearTimeout(splitTimer);
+        splitTimer = setTimeout(applySplit, 150);
+      }
+      if (splitting) {
+        window.addEventListener('resize', resplit);
+        window.addEventListener('load', resplit);
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', resplit);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(resplit);
+        if (window.ResizeObserver) {
+          var ro = new ResizeObserver(resplit);
+          ROOTS.forEach(function (sel) {
+            var el = document.querySelector(sel);
+            if (el) ro.observe(el);
+          });
+        }
+        /* Straight away rather than on DOMContentLoaded: this script sits
+           below #main and the footer, so both are already parsed, and doing
+           it now means the first paint is already filtered. */
+        applySplit();
+      }
+
       function applyField() {
         var low = d.getAttribute('data-field') === 'low'
                && d.getAttribute('data-sr') !== 'on';
 
-        /* The still of the scan comparison ships already resampled — see
-           _includes/scan_slider.html — so it must not be degraded twice. */
-        var still = document.querySelector('.scan-static');
-
         [].slice.call(document.images).forEach(function (img) {
-          if (img === still) return;
           if (low) degrade(img);
           else restore(img);
         });
@@ -349,6 +492,7 @@
           g.className = 'field-grain';
           document.body.appendChild(g);
         }
+        applySplit();
       }
 
       /* The lens needs to put the photographs back to full quality while it
